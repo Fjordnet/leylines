@@ -20,35 +20,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System;
-using UnityEditor;
-using UnityEngine;
 
 namespace Exodrifter.NodeGraph
 {
-	public class TypeResult : SearchResult
+	/// <summary>
+	/// Represents a result in the search panel that, when picked, will add
+	/// a new node to the graph.
+	/// </summary>
+	public class SearchResult
 	{
-		public override string Label
+		/// <summary>
+		/// The string to display in the search panel.
+		/// </summary>
+		public string Label { get; set;  }
+
+		/// <summary>
+		/// The function to execute when this result is selected.
+		/// </summary>
+		public Func<Node> MakeNode { get; set; }
+
+		public SearchResult(string label, Func<Node> makeNode)
 		{
-			get { return Type.FullName.Replace('.', '/'); }
-		}
-
-		public readonly Type Type;
-
-		public TypeResult(Type type)
-		{
-			Type = type;
-		}
-
-		public override void Pick(Graph graph, Vector2 spawnPosition)
-		{
-			var node = CreateNode(Type.Name, spawnPosition);
-
-			node.AddOutputSocket(
-				new DynamicSocket(Type, Type.Name, true, true));
-
-			Undo.RegisterCreatedObjectUndo(node, null);
-
-			AddNode(graph, node);
+			Label = label;
+			MakeNode = makeNode;
 		}
 	}
 }

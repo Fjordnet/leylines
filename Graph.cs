@@ -35,6 +35,8 @@ namespace Exodrifter.NodeGraph
 		private SocketBimap links;
 		[SerializeField]
 		private int nextNodeID;
+		[SerializeField]
+		private NodeGraphPolicy policy = NodeGraphPolicy.DefaultPolicy;
 
 		#region Properties
 
@@ -71,6 +73,12 @@ namespace Exodrifter.NodeGraph
 		{
 			get { return nextNodeID; }
 			set { nextNodeID = value; }
+		}
+
+		public NodeGraphPolicy Policy
+		{
+			get { return policy; }
+			set { policy = value; }
 		}
 
 		#endregion

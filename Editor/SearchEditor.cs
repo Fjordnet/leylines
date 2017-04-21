@@ -22,10 +22,9 @@ namespace Exodrifter.NodeGraph
 		private string searchStr = "";
 		[SerializeField]
 		private int selected = 0;
+		[SerializeField]
+		private NodeGraphPolicy policy;
 
-		private List<Type> types;
-		private Type selectedType;
-		private List<MemberInfo> members;
 		private Texture2D highlight;
 
 		#region Properties
@@ -57,11 +56,13 @@ namespace Exodrifter.NodeGraph
 			this.size = size;
 		}
 
-		public void Open(Vector2 position, Vector2 spawnPosition)
+		public void Open
+			(Vector2 position, Vector2 spawnPosition, NodeGraphPolicy policy)
 		{
 			isOpen = true;
 			this.position = position;
 			this.spawnPosition = spawnPosition;
+			this.policy = policy;
 		}
 
 		public void Close()
@@ -78,8 +79,6 @@ namespace Exodrifter.NodeGraph
 			if (!isOpen) {
 				return;
 			}
-
-			InitTypesCache(ref types);
 
 			var rect = new Rect();
 			rect.size = size;
@@ -119,29 +118,11 @@ namespace Exodrifter.NodeGraph
 			GUI.FocusControl("search_field");
 			GUILayout.EndHorizontal();
 
-			List<SearchResult> results = new List<SearchResult>();
-			if (selectedType != null) {
-				InitMembersCache(ref members, selectedType);
-				results = (from member in members
-						select new MemberResult(selectedType, member))
-						.Where(x => FuzzySearch(searchStr, x.Label) != int.MinValue)
-						.OrderByDescending(x => FuzzySearch(searchStr, x.Label))
-						.Select(x => x as SearchResult)
-						.ToList();
-			}
-			else if (searchStr.Length > 0) {
-				results = (from type in types
-						select new
-						{
-							T = new TypeResult(type),
-							S = FuzzySearch(searchStr,
-								type.FullName.Replace('.', '/'))
-						})
-						.Where(x => x.S != int.MinValue)
-						.OrderByDescending(x => x.S)
-						.Select(x => x.T as SearchResult)
-						.ToList();
-			}
+			var results = (
+					from result in policy.SearchItems
+					orderby FuzzySearch(searchStr, result.Label) descending
+					select result
+				).ToList();
 			selected = Mathf.Clamp(selected, 0, results.Count - 1);
 			
 			var oldRichText = GUI.skin.label.richText;
@@ -220,28 +201,13 @@ namespace Exodrifter.NodeGraph
 					{
 						case KeyCode.KeypadEnter:
 						case KeyCode.Return:
-							results[selected].Pick(editor.Graph, spawnPosition);
+							var node = results[selected].MakeNode();
+							editor.AddNode(node, spawnPosition);
 							Close();
 							break;
 
 						case KeyCode.Escape:
 							Close();
-							break;
-
-						case KeyCode.KeypadPeriod:
-						case KeyCode.Period:
-							if (results[selected] is TypeResult) {
-								selectedType = ((TypeResult)results[selected]).Type;
-								selected = 0;
-							}
-							break;
-
-						case KeyCode.Delete:
-						case KeyCode.Backspace:
-							if (!searchStr.Contains('.')) {
-								selectedType = null;
-								members = null;
-							}
 							break;
 					}
 					break;
@@ -262,35 +228,6 @@ namespace Exodrifter.NodeGraph
 			highlight.Apply();
  
 			return highlight;
-		}
-
-		private static void InitTypesCache(ref List<Type> types)
-		{
-			if (types == null || types.Count == 0)
-			{
-				types = (
-					from assembly in AppDomain.CurrentDomain.GetAssemblies()
-					from type in assembly.GetTypes()
-					where assembly.GetName().Name == "mscorlib"
-						|| assembly.GetName().Name == "Assembly-CSharp"
-						|| assembly.GetName().Name.StartsWith("UnityEngine")
-					select type
-				).ToList();
-			}
-		}
-
-		private static void InitMembersCache(ref List<MemberInfo> members, Type type)
-		{
-			if (members == null || members.Count == 0)
-			{
-				members = (
-					from member in type.GetMembers()
-					where member.MemberType == MemberTypes.Field
-						|| member.MemberType == MemberTypes.Property
-						|| member.MemberType == MemberTypes.Method
-					select member
-				).ToList();
-			}
 		}
 
 		private string FuzzyHighlight(string pattern, string str)

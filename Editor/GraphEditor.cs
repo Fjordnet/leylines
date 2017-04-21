@@ -251,7 +251,7 @@ namespace Exodrifter.NodeGraph
 					{
 						var clipPos = Event.current.mousePosition;
 						clipPos.y -= topToolbarRect.size.y + GRAPH_PADDING;
-						search.Open(clipPos, GraphPosition);
+						search.Open(clipPos, GraphPosition, Graph.Policy);
 						Target = search;
 						GUI.FocusControl("search_field");
 						Event.current.Use();
@@ -302,49 +302,6 @@ namespace Exodrifter.NodeGraph
 			rect.position = Vector2.up * TOOLBAR_HEIGHT;
 			rect.size -= rect.position * 2;
 			return rect;
-		}
-
-		private void ContextMenuCallback(object obj)
-		{
-			var arr = (object[])obj;
-			var pos = (Vector2)arr[0];
-			using (new UndoStack("Add Node To Graph"))
-			{
-				var node = (Node)CreateInstance((Type)arr[1]);
-				AddNode(node, pos);
-			}
-		}
-
-		private GenericMenu GetNodeMenu(Vector2 pos)
-		{
-			var menu = new GenericMenu();
-			var types = GetClassesOfType<Node>();
-
-			foreach (var type in types)
-			{
-				var attributes = (NodeAttribute[])
-					Attribute.GetCustomAttributes(type, typeof(NodeAttribute));
-				if (attributes.Length == 0)
-				{
-					continue;
-				}
-				var attr = attributes[0];
-
-				menu.AddItem(
-					new GUIContent(attr.Path),
-					false, ContextMenuCallback,
-					new object[] { pos, type });
-			}
-
-			return menu;
-		}
-
-		private static Type[] GetClassesOfType<T>(params object[] constructorArgs) where T : class
-		{
-			return (from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
-					from assemblyType in domainAssembly.GetTypes()
-					where typeof(T).IsAssignableFrom(assemblyType) && !assemblyType.IsAbstract
-					select assemblyType).ToArray();
 		}
 
 		/// <summary>
@@ -437,7 +394,7 @@ namespace Exodrifter.NodeGraph
 			Offset = pos + GetGraphRect().size / 2;
 		}
 
-		private void AddNode(Node node, Vector2 pos)
+		public void AddNode(Node node, Vector2 pos)
 		{
 			using (new UndoStack("Add Node To Graph"))
 			{
