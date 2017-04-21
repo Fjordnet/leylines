@@ -6,4 +6,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+* Fix dynamic node creation not working for overloaded methods
 

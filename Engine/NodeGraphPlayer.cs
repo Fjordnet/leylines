@@ -264,13 +264,13 @@ namespace Exodrifter.NodeGraph
 						continue;
 					}
 
-					var value = (ExecType)node.GetSocketValue(socket);
-					if (value == ExecType.None)
+					var value = (ExecType?)node.GetSocketValue(socket);
+					if (value == null || value == ExecType.None)
 					{
 						continue;
 					}
 
-					entryPoints[value].Add(socket);
+					entryPoints[value.Value].Add(socket);
 				}
 			}
 		}
