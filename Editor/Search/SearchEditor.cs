@@ -319,16 +319,21 @@ namespace Exodrifter.NodeGraph
 			return ret;
 		}
 
-		private int FuzzySearch(string pattern, string str)
+		private int FuzzySearch(string pattern, string str,
+			int patternStart = 0, int stringStart = 0)
 		{
 			bool prev = false;
-			int score = 0, unmatched = 0;
-			int pi = 0, si = 0;
+			int bestScore = int.MinValue, score = 0, unmatched = 0;
+			int pi = patternStart, si = stringStart;
 			while (pi < pattern.Length && si < str.Length)
 			{
 				// Increase score
 				if (char.ToLower(pattern[pi]) == char.ToLower(str[si]))
 				{
+					// Exhaustive search
+					var skipScore = FuzzySearch(pattern, str, pi, si + 1);
+					bestScore = Mathf.Max(bestScore, skipScore);
+
 					// Uppercase letters
 					if (char.IsUpper(pattern[pi])) {
 						score += 20;
@@ -371,7 +376,7 @@ namespace Exodrifter.NodeGraph
 			// Add the unmatched leading character penalty
 			score += unmatched;
 
-			return score;
+			return Mathf.Max(score, bestScore);
 		}
 	}
 }
