@@ -15,4 +15,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 * Fix dynamic node creation not working for overloaded methods
 * Fix entry point caching error when trying to get the value of an unset field
+* Fix incorrect uppercase check when calculating fuzzy search scores
 

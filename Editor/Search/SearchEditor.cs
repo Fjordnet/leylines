@@ -335,7 +335,7 @@ namespace Exodrifter.NodeGraph
 					bestScore = Mathf.Max(bestScore, skipScore);
 
 					// Uppercase letters
-					if (char.IsUpper(pattern[pi])) {
+					if (char.IsUpper(str[si])) {
 						score += 20;
 					}
 					// Seperator bonus
