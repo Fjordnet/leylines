@@ -125,7 +125,8 @@ namespace Exodrifter.NodeGraph
 					break;
 
 				case InvokeType.CallMethod:
-					var method = type.GetMethod(invoke.MemberName, flags);
+					var argTypes = BuildArgTypes(0, invoke.Args);
+					var method = type.GetMethod(invoke.MemberName, flags, null, argTypes, null);
 					args = BuildArgs(0, invoke.Args);
 					value = method.Invoke(target, args);
 					if (method.ReturnType != typeof(void)) {
@@ -322,7 +323,8 @@ namespace Exodrifter.NodeGraph
 		{
 			var length = socketArgs.Count - startIndex;
 
-			if (length <= 0) {
+			if (length <= 0)
+			{
 				return null;
 			}
 			var ret = new object[length];
@@ -330,6 +332,31 @@ namespace Exodrifter.NodeGraph
 			for (int i = 0; i < length; ++i)
 			{
 				ret[i] = GetSocketValue(socketArgs[startIndex + i]);
+			}
+
+			return ret;
+		}
+
+		/// <summary>
+		/// Builds an object type argument array from a list of sockets.
+		/// </summary>
+		/// <param name="startIndex">The index to start building at.</param>
+		/// <param name="socketArgs">The sockets to use as arguments.</param>
+		/// <returns>The object argument array.</returns>
+		private Type[] BuildArgTypes(int startIndex, List<string> socketArgs)
+		{
+			var length = socketArgs.Count - startIndex;
+
+			if (length <= 0)
+			{
+				return null;
+			}
+			var ret = new Type[length];
+
+			for (int i = 0; i < length; ++i)
+			{
+				var socket = GetDynamicSocket(socketArgs[startIndex + i]);
+				ret[i] = socket.SocketType;
 			}
 
 			return ret;
