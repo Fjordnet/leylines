@@ -257,6 +257,40 @@ namespace Exodrifter.NodeGraph
 						Event.current.Use();
 					}
 					break;
+
+				case EventType.DragUpdated:
+					if (DragAndDrop.objectReferences.Length == 1)
+					{
+						DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+					}
+					else
+					{
+						DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+					}
+					Event.current.Use();
+					break;
+
+				case EventType.DragPerform:
+					if (DragAndDrop.objectReferences.Length == 1)
+					{
+						DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+						DragAndDrop.AcceptDrag();
+
+						var obj = DragAndDrop.objectReferences[0];
+						var type = obj.GetType();
+
+						var node = CreateInstance<DynamicNode>();
+						var socket = new DynamicSocket(type, type.Name, true, true);
+						socket.SocketValue = obj;
+						node.AddOutputSocket(socket);
+						AddNode(node, GraphPosition);
+					}
+					else
+					{
+						DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+					}
+					Event.current.Use();
+					break;
 			}
 
 			Repaint();
@@ -277,22 +311,7 @@ namespace Exodrifter.NodeGraph
 			using (new UndoStack("Add Node To Graph"))
 			{
 				var node = (Node)CreateInstance((Type)arr[1]);
-				node.ID = Graph.NextNodeID++;
-				node.XPos = Mathf.FloorToInt(pos.x);
-				node.YPos = Mathf.FloorToInt(pos.y);
-				Undo.RegisterCreatedObjectUndo(node, null);
-
-				Undo.RecordObject(Graph, null);
-
-				var path = AssetDatabase.GetAssetPath(Graph.GetInstanceID());
-				// Check if the graph is a persistent asset or a scene asset
-				if (!string.IsNullOrEmpty(path))
-				{
-					AssetDatabase.AddObjectToAsset(node, Graph);
-				}
-				Graph.Nodes.Add(node);
-
-				EditorUtility.SetDirty(Graph);
+				AddNode(node, pos);
 			}
 		}
 
@@ -416,6 +435,28 @@ namespace Exodrifter.NodeGraph
 		{
 			var pos = new Vector2(-newPosition.x, newPosition.y);
 			Offset = pos + GetGraphRect().size / 2;
+		}
+
+		private void AddNode(Node node, Vector2 pos)
+		{
+			using (new UndoStack("Add Node To Graph"))
+			{
+				node.ID = Graph.NextNodeID++;
+				node.Pos = pos;
+				Undo.RegisterCreatedObjectUndo(node, null);
+
+				Undo.RecordObject(Graph, null);
+
+				var path = AssetDatabase.GetAssetPath(Graph.GetInstanceID());
+				// Check if the graph is a persistent asset or a scene asset
+				if (!string.IsNullOrEmpty(path))
+				{
+					AssetDatabase.AddObjectToAsset(node, Graph);
+				}
+				Graph.Nodes.Add(node);
+
+				EditorUtility.SetDirty(Graph);
+			}
 		}
 	}
 }

@@ -74,6 +74,11 @@ namespace Exodrifter.NodeGraph
 		public Vector2 Pos
 		{
 			get { return new Vector2(xPos, yPos); }
+			set
+			{
+				xPos = (int)Math.Round(value.x);
+				yPos = (int)Math.Round(value.y);
+			}
 		}
 
 		/// <summary>
