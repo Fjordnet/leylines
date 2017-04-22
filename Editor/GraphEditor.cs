@@ -21,7 +21,6 @@ SOFTWARE.
 */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -31,14 +30,42 @@ namespace Exodrifter.NodeGraph
 	public class GraphEditor : EditorWindow
 	{
 		[SerializeField]
-		private Graph graph;
+		private bool graphIDSet = false;
+		[SerializeField]
+		private int graphID = 0;
 
 		#region Properties
 
+		private Graph graph;
 		public Graph Graph
 		{
-			get { return graph; }
-			set { graph = value; }
+			get
+			{
+				if (Util.IsNull(graph) && graphIDSet)
+				{
+					var obj = EditorUtility.InstanceIDToObject(graphID);
+					if (obj is Graph)
+					{
+						graph = (Graph)obj;
+					}
+					else
+					{
+						graphIDSet = false;
+					}
+				}
+
+				return graph;
+			}
+			set
+			{
+				graph = value;
+
+				if (!Util.IsNull(graph))
+				{
+					graphID = graph.GetInstanceID();
+					graphIDSet = true;
+				}
+			}
 		}
 
 		public object Target { get; set; }
