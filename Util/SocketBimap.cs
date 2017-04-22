@@ -113,6 +113,25 @@ namespace Exodrifter.NodeGraph
 		}
 
 		/// <summary>
+		/// Returns true if the specified socket is the destination for any
+		/// links.
+		/// </summary>
+		/// <param name="socket">The socket to check.</param>
+		/// <returns>True if the specified socket is linked to.</returns>
+		public bool IsSocketLinkedTo(Socket socket)
+		{
+			foreach (var link in links)
+			{
+				if (link.ToSocket == socket)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/// <summary>
 		/// Removes a link from the bimap.
 		/// </summary>
 		/// <param name="a">The first socket in the link.</param>

@@ -137,9 +137,9 @@ namespace Exodrifter.NodeGraph
 		/// </summary>
 		/// <param name="graph">The graph this socket is in.</param>
 		/// <returns>True if this socket is editable.</returns>
-		public object IsEditable(Graph graph)
+		public bool IsEditable(Graph graph)
 		{
-			return GetNode(graph).GetSocketWidth(this);
+			return GetNode(graph).IsSocketEditable(this);
 		}
 
 		/// <summary>

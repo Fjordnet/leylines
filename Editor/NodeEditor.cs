@@ -50,9 +50,9 @@ namespace Exodrifter
 			var outputs = node.GetOutputSockets();
 
 			var inputWidth = GetContentWidth(node, inputs);
-			var inputHeight = GetPropertyHeights(serializedObject, node, inputs);
+			var inputHeight = GetPropertyHeights(serializedObject, node, inputs, editor);
 			var outputWidth = GetContentWidth(node, outputs);
-			var outputHeight = GetPropertyHeights(serializedObject, node, outputs);
+			var outputHeight = GetPropertyHeights(serializedObject, node, outputs, editor);
 			var height = Mathf.Max(inputHeight, outputHeight);
 
 			// Draw box
@@ -180,8 +180,9 @@ namespace Exodrifter
 
 				string name = node.GetSocketDisplayName(socket);
 				bool editable = node.IsSocketEditable(socket);
+				bool linked = editor.Graph.Links.IsSocketLinkedTo(socket);
 
-				if (editable)
+				if (editable && !linked)
 				{
 					rect.height = h;
 					var type = node.GetSocketType(socket);
@@ -216,12 +217,17 @@ namespace Exodrifter
 		}
 
 		private static float GetPropertyHeights
-			(SerializedObject serializedObject, Node node, IEnumerable<Socket> sockets)
+			(SerializedObject serializedObject, Node node,
+			IEnumerable<Socket> sockets, GraphEditor editor)
 		{
+
 			float height = 0f;
 			foreach (var socket in sockets)
 			{
-				if (node.IsSocketEditable(socket))
+				var editable = node.IsSocketEditable(socket);
+				var linked = editor.Graph.Links.IsSocketLinkedTo(socket);
+
+				if (editable && !linked)
 				{
 					var type = node.GetSocketType(socket);
 					var value = node.GetSocketValue(socket);
