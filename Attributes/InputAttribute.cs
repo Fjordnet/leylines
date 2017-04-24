@@ -31,20 +31,17 @@ namespace Exodrifter.NodeGraph
 	public class InputAttribute : SocketAttribute
 	{
 		public InputAttribute(string name, int width)
-			: base(name, width, true, false)
+			: base(name, width, SocketFlags.Editable)
+		{
+		}
+		public InputAttribute(string name, SocketFlags flags)
+			: base(name, DEFAULT_WIDTH, flags)
 		{
 		}
 
-		public InputAttribute(string name, bool editable,
-			bool allowMultipleLinks)
-			: base(name, DEFAULT_WIDTH, editable, allowMultipleLinks)
-		{
-		}
-
-		public InputAttribute(string name = null,
-			int width = DEFAULT_WIDTH, bool editable = true,
-			bool allowMultipleLinks = false)
-			: base(name, width, editable, allowMultipleLinks)
+		public InputAttribute(string name = null, int width = DEFAULT_WIDTH,
+			SocketFlags flags = SocketFlags.Editable)
+			: base(name, width, flags)
 		{
 		}
 	}

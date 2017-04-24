@@ -62,19 +62,10 @@ namespace Exodrifter.NodeGraph
 		/// <summary>
 		/// True if this socket's value is editable.
 		/// </summary>
-		public bool Editable
+		public SocketFlags Flags
 		{
-			get { return flags.IsEditable(); }
-			set { flags = flags.SetIsEditable(value); }
-		}
-
-		/// <summary>
-		/// True if this socket allows multiple links.
-		/// </summary>
-		public bool AllowMultipleLinks
-		{
-			get { return flags.IsEditable(); }
-			set { flags = flags.SetAllowMultipleLinks(value); }
+			get { return flags; }
+			set { flags = value; }
 		}
 
 		/// <summary>
@@ -102,25 +93,20 @@ namespace Exodrifter.NodeGraph
 		/// </summary>
 		/// <param name="type">The type of the socket.</param>
 		/// <param name="name">The name of the socket.</param>
-		/// <param name="editable">
-		/// True if this socket's value is editable.
-		/// </param>
+		/// <param name="flags">The socket flags.</param>
 		/// <param name="allowMultipleLinks">
 		/// True if this socket allows multiple links.
 		/// </param>
 		/// <param name="width">
 		/// The width of this socket in the node graph UI.
 		/// </param>
-		public DynamicSocket(Type type, string name,
-			bool editable, bool allowMultipleLinks,
+		public DynamicSocket(Type type, string name, SocketFlags flags = 0,
 			int width = SocketAttribute.DEFAULT_WIDTH)
 		{
 			value = new DynamicValue();
-			SocketName = name;
 			SocketType = type;
-
-			Editable = editable;
-			AllowMultipleLinks = allowMultipleLinks;
+			SocketName = name;
+			Flags = flags;
 			Width = width;
 		}
 	}

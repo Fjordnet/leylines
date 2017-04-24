@@ -87,11 +87,11 @@ namespace Exodrifter.NodeGraph
 							otherSocket
 						)
 					);
-					if (!socket.AllowsMultipleLinks(graph))
+					if (!socket.GetFlags(graph).AllowMultipleLinks())
 					{
 						graph.Links.RemoveAllWith(socket);
 					}
-					if (!otherSocket.AllowsMultipleLinks(graph))
+					if (!otherSocket.GetFlags(graph).AllowMultipleLinks())
 					{
 						graph.Links.RemoveAllWith(otherSocket);
 					}

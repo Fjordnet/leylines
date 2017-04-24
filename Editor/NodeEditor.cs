@@ -179,7 +179,7 @@ namespace Exodrifter
 				SocketEditor.DrawSocket(editor, node, socket, socketRect);
 
 				string name = node.GetSocketDisplayName(socket);
-				bool editable = node.IsSocketEditable(socket);
+				bool editable = node.GetSocketFlags(socket).IsEditable();
 				bool linked = editor.Graph.Links.IsSocketLinkedTo(socket);
 
 				if (editable && !linked)
@@ -224,7 +224,7 @@ namespace Exodrifter
 			float height = 0f;
 			foreach (var socket in sockets)
 			{
-				var editable = node.IsSocketEditable(socket);
+				var editable = node.GetSocketFlags(socket).IsEditable();
 				var linked = editor.Graph.Links.IsSocketLinkedTo(socket);
 
 				if (editable && !linked)
@@ -274,7 +274,7 @@ namespace Exodrifter
 					max = max ?? width;
 					max = Mathf.Max(max.Value, width);
 				}
-				else if (node.IsSocketEditable(socket))
+				else if (node.GetSocketFlags(socket).IsEditable())
 				{
 					float width = node.GetSocketWidth(socket);
 					max = max ?? width;

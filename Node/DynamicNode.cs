@@ -234,16 +234,16 @@ namespace Exodrifter.NodeGraph
 
 		#region Socket Properties
 
-		public override bool GetSocketAllowsMultipleLinks(string name)
-		{
-			var socket = GetDynamicSocket(name);
-			return socket.AllowMultipleLinks;
-		}
-
 		public override string GetSocketDisplayName(string name)
 		{
 			var socket = GetDynamicSocket(name);
 			return socket.SocketName;
+		}
+
+		public override SocketFlags GetSocketFlags(string name)
+		{
+			var socket = GetDynamicSocket(name);
+			return socket.Flags;
 		}
 
 		public override Type GetSocketType(string name)
@@ -262,12 +262,6 @@ namespace Exodrifter.NodeGraph
 		{
 			var socket = GetDynamicSocket(name);
 			return socket.Width;
-		}
-
-		public override bool IsSocketEditable(string name)
-		{
-			var socket = GetDynamicSocket(name);
-			return socket.Editable;
 		}
 
 		public override bool IsSocketInput(string name)

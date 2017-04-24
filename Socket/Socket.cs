@@ -83,16 +83,6 @@ namespace Exodrifter.NodeGraph
 		#region Getters/Setters
 
 		/// <summary>
-		/// Returns true if this socket allows multiple links.
-		/// </summary>
-		/// <param name="graph">The graph this socket is in.</param>
-		/// <returns>True if this socket allows multiple links.</returns>
-		public bool AllowsMultipleLinks(Graph graph)
-		{
-			return GetNode(graph).GetSocketAllowsMultipleLinks(this);
-		}
-
-		/// <summary>
 		/// Returns the display name of this socket.
 		/// </summary>
 		/// <param name="graph">The graph this socket is in.</param>
@@ -100,6 +90,16 @@ namespace Exodrifter.NodeGraph
 		public string GetDisplayName(Graph graph)
 		{
 			return GetNode(graph).GetSocketDisplayName(this);
+		}
+
+		/// <summary>
+		/// Returns the flags for this socket.
+		/// </summary>
+		/// <param name="graph">The graph this socket is in.</param>
+		/// <returns>The flags for this socket.</returns>
+		public SocketFlags GetFlags(Graph graph)
+		{
+			return GetNode(graph).GetSocketFlags(this);
 		}
 
 		/// <summary>
@@ -130,16 +130,6 @@ namespace Exodrifter.NodeGraph
 		public object GetWidth(Graph graph)
 		{
 			return GetNode(graph).GetSocketWidth(this);
-		}
-
-		/// <summary>
-		/// Returns true if this socket is editable.
-		/// </summary>
-		/// <param name="graph">The graph this socket is in.</param>
-		/// <returns>True if this socket is editable.</returns>
-		public bool IsEditable(Graph graph)
-		{
-			return GetNode(graph).IsSocketEditable(this);
 		}
 
 		/// <summary>

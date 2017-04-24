@@ -9,7 +9,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		/// <summary>
 		/// The execution entry point.
 		/// </summary>
-		[SerializeField, Output("Exec", true, true)]
+		[SerializeField, Output("Exec", SocketFlags.AllowMultipleLinks | SocketFlags.Editable)]
 		internal ExecType execOut = ExecType.OnStart;
 
 		#region Methods

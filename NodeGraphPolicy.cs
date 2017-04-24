@@ -267,24 +267,24 @@ namespace Exodrifter.NodeGraph
 
 					var method = (MethodInfo)member;
 					node.AddInputSocket(
-						new DynamicSocket(typeof(ExecType), "execIn", false, true));
+						new DynamicSocket(typeof(ExecType), "execIn"));
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, true, false));
+						new DynamicSocket(type, type.Name, SocketFlags.Editable));
 
 					var @params = new List<string>();
 					foreach (var param in method.GetParameters())
 					{
 						node.AddInputSocket(
-							new DynamicSocket(param.ParameterType, param.Name, true, false));
+							new DynamicSocket(param.ParameterType, param.Name, SocketFlags.Editable));
 						@params.Add(param.Name);
 					}
 
 					node.AddOutputSocket(
-						new DynamicSocket(typeof(ExecType), "execOut", false, true));
+						new DynamicSocket(typeof(ExecType), "execOut", SocketFlags.AllowMultipleLinks));
 					if (method.ReturnType != typeof(void))
 					{
 						node.AddOutputSocket(
-							new DynamicSocket(method.ReturnType, "result", false, true));
+							new DynamicSocket(method.ReturnType, "result", SocketFlags.AllowMultipleLinks));
 					}
 
 					node.AddExecInvoke(
@@ -297,10 +297,10 @@ namespace Exodrifter.NodeGraph
 
 					var field = (FieldInfo)member;
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, true, false));
+						new DynamicSocket(type, type.Name, SocketFlags.Editable));
 
 					node.AddOutputSocket(
-						new DynamicSocket(field.FieldType, member.Name, false, true));
+						new DynamicSocket(field.FieldType, member.Name, SocketFlags.AllowMultipleLinks));
 
 					node.AddEvalInvoke(
 						new EvalInvoke(type.Name, "result", member.Name, InvokeType.GetProperty));
@@ -311,10 +311,10 @@ namespace Exodrifter.NodeGraph
 
 					var property = (PropertyInfo)member;
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, true, true));
+						new DynamicSocket(type, type.Name, SocketFlags.Editable));
 
 					node.AddOutputSocket(
-						new DynamicSocket(property.PropertyType, member.Name, false, true));
+						new DynamicSocket(property.PropertyType, member.Name, SocketFlags.AllowMultipleLinks));
 
 					node.AddEvalInvoke(
 						new EvalInvoke(type.Name, "result", member.Name, InvokeType.GetProperty));

@@ -144,27 +144,6 @@ namespace Exodrifter.NodeGraph
 		#region Socket Properties
 
 		/// <summary>
-		/// Returns true if the specified socket allows multiple links.
-		/// </summary>
-		/// <param name="name">The name of the socket.</param>
-		/// <returns>True if the specified socket allows multiple links.</returns>
-		public abstract bool GetSocketAllowsMultipleLinks(string name);
-
-		/// <summary>
-		/// Returns true if the specified socket allows multiple links.
-		/// </summary>
-		/// <param name="socket">The socket to check.</param>
-		/// <returns>True if the specified socket allows multiple links.</returns>
-		public bool GetSocketAllowsMultipleLinks(Socket socket)
-		{
-			if (socket.NodeID != id) {
-				throw new ArgumentException
-					("Specified socket has the wrong node ID!");
-			}
-			return GetSocketAllowsMultipleLinks(socket.FieldName);
-		}
-
-		/// <summary>
 		/// Returns the display name of a socket on this node.
 		/// </summary>
 		/// <param name="name">
@@ -185,6 +164,27 @@ namespace Exodrifter.NodeGraph
 					("Specified socket has the wrong node ID!");
 			}
 			return GetSocketDisplayName(socket.FieldName);
+		}
+
+		/// <summary>
+		/// Returns the flags of a socket on this node.
+		/// </summary>
+		/// <param name="name">The name of the socket.</param>
+		/// <returns>The socket flags.</returns>
+		public abstract SocketFlags GetSocketFlags(string name);
+
+		/// <summary>
+		/// Returns the flags of a socket on this node.
+		/// </summary>
+		/// <param name="name">The socket to check.</param>
+		/// <returns>The socket flags.</returns>
+		public SocketFlags GetSocketFlags(Socket socket)
+		{
+			if (socket.NodeID != id) {
+				throw new ArgumentException
+					("Specified socket has the wrong node ID!");
+			}
+			return GetSocketFlags(socket.FieldName);
 		}
 
 		/// <summary>
@@ -252,27 +252,6 @@ namespace Exodrifter.NodeGraph
 					("Specified socket has the wrong node ID!");
 			}
 			return GetSocketWidth(socket.FieldName);
-		}
-
-		/// <summary>
-		/// Returns true if the specified socket is editable.
-		/// </summary>
-		/// <param name="name">The name of the socket.</param>
-		/// <returns>True if the specified socket is editable.</returns>
-		public abstract bool IsSocketEditable(string name);
-
-		/// <summary>
-		/// Returns true if the specified socket is editable.
-		/// </summary>
-		/// <param name="socket">The socket to check.</param>
-		/// <returns>True if the specified socket is editable.</returns>
-		public bool IsSocketEditable(Socket socket)
-		{
-			if (socket.NodeID != id) {
-				throw new ArgumentException
-					("Specified socket has the wrong node ID!");
-			}
-			return IsSocketEditable(socket.FieldName);
 		}
 
 		/// <summary>

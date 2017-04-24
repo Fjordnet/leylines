@@ -104,16 +104,16 @@ namespace Exodrifter.NodeGraph
 
 		#region Socket Properties
 
-		public override bool GetSocketAllowsMultipleLinks(string name)
-		{
-			var attr = GetFieldAttribute<SocketAttribute>(name);
-			return attr.allowMultipleLinks;
-		}
-
 		public override string GetSocketDisplayName(string name)
 		{
 			var attr = GetFieldAttribute<SocketAttribute>(name);
 			return attr.name;
+		}
+
+		public override SocketFlags GetSocketFlags(string name)
+		{
+			var attr = GetFieldAttribute<SocketAttribute>(name);
+			return attr.flags;
 		}
 
 		public override Type GetSocketType(string name)
@@ -132,12 +132,6 @@ namespace Exodrifter.NodeGraph
 		{
 			var attr = GetFieldAttribute<SocketAttribute>(name);
 			return attr.width;
-		}
-
-		public override bool IsSocketEditable(string name)
-		{
-			var attr = GetFieldAttribute<SocketAttribute>(name);
-			return attr.editable;
 		}
 
 		public override bool IsSocketInput(string name)

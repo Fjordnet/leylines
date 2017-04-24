@@ -34,17 +34,14 @@ namespace Exodrifter.NodeGraph
 
 		public readonly string name;
 		public readonly int width;
-		public readonly bool editable;
-		public readonly bool allowMultipleLinks;
+		public readonly SocketFlags flags;
 
-		public SocketAttribute(string name = null,
-			int width = DEFAULT_WIDTH, bool editable = true,
-			bool allowMultipleLinks = true)
+		public SocketAttribute(string name = null, int width = DEFAULT_WIDTH,
+			SocketFlags flags = 0)
 		{
 			this.name = name;
 			this.width = width;
-			this.editable = editable;
-			this.allowMultipleLinks = allowMultipleLinks;
+			this.flags = flags;
 		}
 	}
 }
