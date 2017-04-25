@@ -12,9 +12,6 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("The transform to rotate.")]
 		[SerializeField, Input("Transform")]
 		internal Transform transform = null;
-		[Description("Defines the point and axis as local or world.")]
-		[SerializeField, Input("Relative To")]
-		internal Space space = Space.Self;
 		[Description("The point to rotate around.")]
 		[SerializeField, Input("Point")]
 		internal Vector3 point = Vector3.zero;
@@ -43,11 +40,6 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		public override IEnumerator<Yield> Exec
 			(Socket from, Socket to, GraphScope scope)
 		{
-			var point = this.point;
-			if (space == Space.Self) {
-				point += transform.position;
-			}
-
 			transform.RotateAround(point, axis, degrees * delta);
 			transformOut = transform;
 			deltaOut = delta;
