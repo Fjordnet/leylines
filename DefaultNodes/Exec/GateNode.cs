@@ -19,7 +19,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		internal ExecType execIn = ExecType.None;
 
 		[Description("True if the gate is open.")]
-		[SerializeField, Input("IsOpen", SocketFlags.Editable)]
+		[SerializeField, Input("IsOpen", 20, SocketFlags.Editable)]
 		internal bool isOpen = false;
 
 		[Description("The execution signal that passed through the gate.")]
