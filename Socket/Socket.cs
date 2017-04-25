@@ -83,6 +83,16 @@ namespace Exodrifter.NodeGraph
 		#region Getters/Setters
 
 		/// <summary>
+		/// Returns the description of this socket.
+		/// </summary>
+		/// <param name="graph">The graph this socket is in.</param>
+		/// <returns>The description of this socket.</returns>
+		public string GetDescription(Graph graph)
+		{
+			return GetNode(graph).GetSocketDescription(this);
+		}
+
+		/// <summary>
 		/// Returns the display name of this socket.
 		/// </summary>
 		/// <param name="graph">The graph this socket is in.</param>

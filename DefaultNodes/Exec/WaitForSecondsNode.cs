@@ -6,21 +6,15 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	[Node(Name = "Wait For Seconds", Path = "Exec/Wait For Seconds")]
 	public class WaitForSecondsNode : BakedNode
 	{
-		/// <summary>
-		/// The input signal.
-		/// </summary>
+		[Description("The input signal.")]
 		[SerializeField, Input("Exec", (SocketFlags)0)]
 		internal ExecType execIn = ExecType.None;
 
-		/// <summary>
-		/// The number of seconds to wait for.
-		/// </summary>
+		[Description("The number of seconds to wait for.")]
 		[SerializeField, Input("Seconds", 50)]
 		internal float seconds = 1;
 
-		/// <summary>
-		/// The output signal.
-		/// </summary>
+		[Description("The output signal.")]
 		[SerializeField, Output("Exec")]
 		internal ExecType execOut = ExecType.None;
 

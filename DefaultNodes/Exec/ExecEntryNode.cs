@@ -6,9 +6,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	[Node(Name = "Execution", Path = "Exec/ExecEntry")]
 	public class ExecEntryNode : BakedNode
 	{
-		/// <summary>
-		/// The execution entry point.
-		/// </summary>
+		[Description("The execution signal to trigger on.")]
 		[SerializeField, Output("Exec", SocketFlags.AllowMultipleLinks | SocketFlags.Editable)]
 		internal ExecType execOut = ExecType.OnStart;
 

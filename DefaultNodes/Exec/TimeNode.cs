@@ -11,10 +11,12 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 			SecondsSinceGameStart, UnscaledSecondsSinceGameStart,
 		}
 
+		[Description("The type of time to get.")]
 		[SerializeField, Input("Type")]
 		internal TimeType type = TimeType.DeltaTime;
 
-		[SerializeField, Output("Delta")]
+		[Description("The time value in seconds.")]
+		[SerializeField, Output("Time")]
 		internal float delta = 0;
 
 		#region Methods

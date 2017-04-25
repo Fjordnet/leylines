@@ -144,6 +144,30 @@ namespace Exodrifter.NodeGraph
 		#region Socket Properties
 
 		/// <summary>
+		/// Returns the description of a socket on this node.
+		/// </summary>
+		/// <param name="name">
+		/// The name of the socket to get the value of.
+		/// </param>
+		/// <returns>The description of the socket.</returns>
+		public abstract string GetSocketDescription(string name);
+
+		/// <summary>
+		/// Returns the display name of a socket on this node.
+		/// </summary>
+		/// <param name="socket">The socket to get the display name of.</param>
+		/// <returns>The display name of the socket.</returns>
+		public string GetSocketDescription(Socket socket)
+		{
+			if (socket.NodeID != id)
+			{
+				throw new ArgumentException
+					("Specified socket has the wrong node ID!");
+			}
+			return GetSocketDescription(socket.FieldName);
+		}
+
+		/// <summary>
 		/// Returns the display name of a socket on this node.
 		/// </summary>
 		/// <param name="name">

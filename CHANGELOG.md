@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Added popup to member fields in nodes that display the display name of the
   member
 * Added Gate logic node
+* Added tooltips on sockets with type, name, and description information
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results

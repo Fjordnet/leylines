@@ -192,6 +192,14 @@ namespace Exodrifter
 			// Draw the popup
 			if (popupSocket != null)
 			{
+				var content = new GUIContent(string.Format(
+					"<color=#5bb><i>{0}</i></color> <b>{1}</b>\n{2}",
+					node.GetSocketType(popupSocket).Name,
+					node.GetSocketDisplayName(popupSocket),
+					node.GetSocketDescription(popupSocket)
+					?? "<color=#aaa><i>No documentation</i></color>"
+				));
+
 				var richText = GUI.skin.box.richText;
 				var color = GUI.skin.box.normal.textColor;
 				var alignment = GUI.skin.box.alignment;
@@ -202,11 +210,8 @@ namespace Exodrifter
 				var popupRect = new Rect();
 				popupRect.xMin = Event.current.mousePosition.x + 10;
 				popupRect.yMin = Event.current.mousePosition.y + 10;
-				popupRect.size = new Vector2(200, 50);
-				GUI.Box(popupRect, string.Format(
-					"<b>{0}</b>",
-					popupSocket.GetDisplayName(editor.Graph))
-				);
+				popupRect.size = GUI.skin.box.CalcSize(content);
+				GUI.Box(popupRect, content);
 
 				GUI.skin.box.richText = richText;
 				GUI.skin.box.normal.textColor = color;

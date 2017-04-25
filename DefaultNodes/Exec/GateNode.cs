@@ -6,25 +6,24 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	[Node(Name = "Gate", Path = "Exec/Gate")]
 	public class GateNode : BakedNode
 	{
-		/// <summary>
-		/// Opens the gate
-		/// </summary>
+		[Description("The execution signal that opens the gate.")]
 		[SerializeField, Input("Open", SocketFlags.AllowMultipleLinks)]
 		internal ExecType open = ExecType.None;
 
-		/// <summary>
-		/// Closes the gate
-		/// </summary>
+		[Description("The execution signal that closes the gate.")]
 		[SerializeField, Input("Close", SocketFlags.AllowMultipleLinks)]
 		internal ExecType close = ExecType.None;
 
-		[SerializeField, Input("Exec In", SocketFlags.AllowMultipleLinks)]
+		[Description("The execution signal to pass through the gate.")]
+		[SerializeField, Input("Exec In", (SocketFlags)0)]
 		internal ExecType execIn = ExecType.None;
 
+		[Description("True if the gate is open.")]
 		[SerializeField, Input("IsOpen", SocketFlags.Editable)]
 		internal bool isOpen = false;
 
-		[SerializeField, Output("Exec Out", SocketFlags.AllowMultipleLinks)]
+		[Description("The execution signal that passed through the gate.")]
+		[SerializeField, Output("Exec Out")]
 		internal ExecType execOut = ExecType.None;
 
 		#region Methods

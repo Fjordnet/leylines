@@ -104,6 +104,16 @@ namespace Exodrifter.NodeGraph
 
 		#region Socket Properties
 
+		public override string GetSocketDescription(string name)
+		{
+			var attr = GetFieldAttribute<DescriptionAttribute>(name);
+			if (attr != null)
+			{
+				return attr.text;
+			}
+			return null;
+		}
+
 		public override string GetSocketDisplayName(string name)
 		{
 			var attr = GetFieldAttribute<SocketAttribute>(name);

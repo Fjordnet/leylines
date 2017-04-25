@@ -234,6 +234,12 @@ namespace Exodrifter.NodeGraph
 
 		#region Socket Properties
 
+		public override string GetSocketDescription(string name)
+		{
+			var socket = GetDynamicSocket(name);
+			return socket.Description;
+		}
+
 		public override string GetSocketDisplayName(string name)
 		{
 			var socket = GetDynamicSocket(name);

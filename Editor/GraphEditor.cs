@@ -307,7 +307,7 @@ namespace Exodrifter.NodeGraph
 						var type = obj.GetType();
 
 						var node = CreateInstance<DynamicNode>();
-						var socket = new DynamicSocket(type, type.Name,
+						var socket = new DynamicSocket(type, type.Name, null,
 							SocketFlags.AllowMultipleLinks | SocketFlags.Editable);
 						socket.SocketValue = obj;
 						node.AddOutputSocket(socket);
