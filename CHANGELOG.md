@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results
+* Node boxes include the label to make it easier to drag the node
 
 ### Fixed
 * Fix dynamic node creation not working for overloaded methods

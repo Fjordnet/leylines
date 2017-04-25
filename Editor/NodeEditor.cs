@@ -53,7 +53,8 @@ namespace Exodrifter
 			var inputHeight = GetPropertyHeights(serializedObject, node, inputs, editor);
 			var outputWidth = GetContentWidth(node, outputs);
 			var outputHeight = GetPropertyHeights(serializedObject, node, outputs, editor);
-			var height = Mathf.Max(inputHeight, outputHeight);
+			var height = Mathf.Max(inputHeight, outputHeight)
+				+ LINE_PADDING + EditorGUIUtility.singleLineHeight;
 
 			// Draw box
 			var rect = new Rect();
@@ -67,20 +68,21 @@ namespace Exodrifter
 			rect.height = height + BOX_PADDING * 2;
 			rect.center = new Vector2(node.XPos, -node.YPos) + editor.Offset;
 
-			var labelRect = new Rect(rect);
-			labelRect.height = EditorGUIUtility.singleLineHeight;
-			labelRect.y -= labelRect.height + LINE_PADDING;
-			GUI.Label(labelRect, node.DisplayName);
-
 			var fullRect = new Rect(rect);
 			GUI.Box(rect, GUIContent.none);
+
+			var labelRect = new Rect(rect);
+			labelRect.x += BOX_PADDING;
+			labelRect.y += BOX_PADDING;
+			labelRect.height = EditorGUIUtility.singleLineHeight;
+			GUI.Label(labelRect, node.DisplayName);
 
 			rect.x += BOX_PADDING;
 			if (inputWidth != 0)
 			{
 				rect.x += SOCKET_RADIUS * 2 + SOCKET_PADDING;
 			}
-			rect.y += BOX_PADDING;
+			rect.y = labelRect.y + labelRect.height + LINE_PADDING;
 			rect.width = inputWidth;
 			var leftRect = new Rect(rect);
 
@@ -122,6 +124,14 @@ namespace Exodrifter
 							node.YPos = Mathf.RoundToInt(graphPos.y / editor.Snap) * editor.Snap;
 						}
 
+						Event.current.Use();
+					}
+					break;
+
+				case EventType.MouseUp:
+					if (ReferenceEquals(editor.Target, node))
+					{
+						editor.Target = null;
 						Event.current.Use();
 					}
 					break;
@@ -224,7 +234,7 @@ namespace Exodrifter
 			}
 
 			// Prepare a tooltip
-			if (rect.Contains(Event.current.mousePosition))
+			if (rect.Contains(Event.current.mousePosition) && editor.Target == null)
 			{
 				var text = string.Format(
 					"<color=#5bb><i>{0}</i></color> <b>{1}</b>\n{2}",

@@ -315,6 +315,15 @@ namespace Exodrifter.NodeGraph
 					}
 					break;
 
+				case EventType.MouseUp:
+					if (ReferenceEquals(Target, this))
+					{
+						Target = null;
+						GUI.FocusControl(null);
+						Event.current.Use();
+					}
+					break;
+
 				case EventType.ContextClick:
 					if (graphRect.Contains(Event.current.mousePosition))
 					{
