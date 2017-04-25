@@ -161,7 +161,6 @@ namespace Exodrifter
 		{
 			rect = new Rect(rect);
 
-			Socket popupSocket = null;
 			foreach (var socket in sockets)
 			{
 				// Draw the socket
@@ -181,45 +180,12 @@ namespace Exodrifter
 				SocketEditor.DrawSocket(editor, node, socket, socketRect);
 
 				// Draw the member
-				if (DrawMember(isInput, editor, node,
-					ref rect, serializedObject, socket))
-				{
-					popupSocket = socket;
-				}
+				DrawMember(isInput, editor, node, ref rect, serializedObject, socket);
 				rect.y += rect.height + LINE_PADDING;
-			}
-
-			// Draw the popup
-			if (popupSocket != null)
-			{
-				var content = new GUIContent(string.Format(
-					"<color=#5bb><i>{0}</i></color> <b>{1}</b>\n{2}",
-					node.GetSocketType(popupSocket).Name,
-					node.GetSocketDisplayName(popupSocket),
-					node.GetSocketDescription(popupSocket)
-					?? "<color=#aaa><i>No documentation</i></color>"
-				));
-
-				var richText = GUI.skin.box.richText;
-				var color = GUI.skin.box.normal.textColor;
-				var alignment = GUI.skin.box.alignment;
-				GUI.skin.box.richText = true;
-				GUI.skin.box.normal.textColor = Color.white;
-				GUI.skin.box.alignment = TextAnchor.UpperLeft;
-
-				var popupRect = new Rect();
-				popupRect.xMin = Event.current.mousePosition.x + 10;
-				popupRect.yMin = Event.current.mousePosition.y + 10;
-				popupRect.size = GUI.skin.box.CalcSize(content);
-				GUI.Box(popupRect, content);
-
-				GUI.skin.box.richText = richText;
-				GUI.skin.box.normal.textColor = color;
-				GUI.skin.box.alignment = alignment;
 			}
 		}
 
-		private static bool DrawMember
+		private static void DrawMember
 			(bool isInput, GraphEditor editor, Node node, ref Rect rect,
 			SerializedObject serializedObject, Socket socket)
 		{
@@ -250,7 +216,6 @@ namespace Exodrifter
 						(rect, value, type, GUIContent.none, true);
 					node.SetSocketValue(socket, value);
 				}
-
 			}
 			else
 			{
@@ -258,8 +223,18 @@ namespace Exodrifter
 				EditorGUI.LabelField(rect, name);
 			}
 
-			return rect.Contains(Event.current.mousePosition);
-			
+			// Prepare a tooltip
+			if (rect.Contains(Event.current.mousePosition))
+			{
+				var text = string.Format(
+					"<color=#5bb><i>{0}</i></color> <b>{1}</b>\n{2}",
+					node.GetSocketType(socket).Name,
+					node.GetSocketDisplayName(socket),
+					node.GetSocketDescription(socket)
+					?? "<color=#aaa><i>No documentation</i></color>"
+				);
+				editor.Target = new Tooltip(text);
+			}
 		}
 
 		private static float GetPropertyHeights

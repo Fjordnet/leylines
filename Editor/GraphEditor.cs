@@ -251,6 +251,13 @@ namespace Exodrifter.NodeGraph
 					}
 				}
 
+				// Draw Tooltip
+				if (Target is Tooltip)
+				{
+					(Target as Tooltip).OnGUI();
+					Target = null;
+				}
+
 				// Search box
 				search.OnGUI(this);
 
