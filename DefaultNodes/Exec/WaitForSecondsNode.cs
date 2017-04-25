@@ -9,7 +9,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		/// <summary>
 		/// The input signal.
 		/// </summary>
-		[SerializeField, Input("Exec")]
+		[SerializeField, Input("Exec", (SocketFlags)0)]
 		internal ExecType execIn = ExecType.None;
 
 		/// <summary>

@@ -87,7 +87,7 @@ namespace Exodrifter.NodeGraph
 					while (yield.MoveNext())
 					{
 						// Check if execution is delayed
-						if (!yield.Current.Finished)
+						if (yield.Current != null && !yield.Current.Finished)
 						{
 							yields.Add(yield);
 							break;
@@ -196,6 +196,12 @@ namespace Exodrifter.NodeGraph
 
 			foreach (var yield in yields)
 			{
+				if (yield.Current == null)
+				{
+					toRemove.Add(yield);
+					continue;
+				}
+
 				yield.Current.OnUpdate();
 
 				if (!yield.Current.Finished)
