@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   graph can take
 * Added Rotate, RotateAround, and Translate nodes
 * Added Time nodes for getting delta times
+* Added popup to member fields in nodes that display the display name of the
+  member
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results

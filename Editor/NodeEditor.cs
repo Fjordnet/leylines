@@ -161,8 +161,10 @@ namespace Exodrifter
 		{
 			rect = new Rect(rect);
 
+			Socket popupSocket = null;
 			foreach (var socket in sockets)
 			{
+				// Draw the socket
 				var h = EditorGUIUtility.singleLineHeight;
 				var socketRect = new Rect(rect);
 				if (isInput)
@@ -178,42 +180,81 @@ namespace Exodrifter
 				socketRect.y += (h - socketRect.height) / 2;
 				SocketEditor.DrawSocket(editor, node, socket, socketRect);
 
-				string name = node.GetSocketDisplayName(socket);
-				bool editable = node.GetSocketFlags(socket).IsEditable();
-				bool linked = editor.Graph.Links.IsSocketLinkedTo(socket);
-
-				if (editable && !linked)
+				// Draw the member
+				if (DrawMember(isInput, editor, node,
+					ref rect, serializedObject, socket))
 				{
-					rect.height = h;
-					var type = node.GetSocketType(socket);
-					var value = node.GetSocketValue(socket);
+					popupSocket = socket;
+				}
+				rect.y += rect.height + LINE_PADDING;
+			}
 
-					var prop = serializedObject.FindProperty(socket.FieldName);
-					if (prop != null)
-					{
-						EditorGUI.PropertyField(rect, prop, GUIContent.none, true);
-					}
-					else if (type == null)
-					{
-						GUI.enabled = false;
-						EditorGUI.TextField(rect, GUIContent.none, "Unknown Type");
-						GUI.enabled = true;
-					}
-					else
-					{
-						value = GUIExtension.DrawField(rect, value, type, GUIContent.none, true);
-						node.SetSocketValue(socket, value);
-					}
+			// Draw the popup
+			if (popupSocket != null)
+			{
+				var richText = GUI.skin.box.richText;
+				var color = GUI.skin.box.normal.textColor;
+				var alignment = GUI.skin.box.alignment;
+				GUI.skin.box.richText = true;
+				GUI.skin.box.normal.textColor = Color.white;
+				GUI.skin.box.alignment = TextAnchor.UpperLeft;
 
-					rect.y += rect.height + LINE_PADDING;
+				var popupRect = new Rect();
+				popupRect.xMin = Event.current.mousePosition.x + 10;
+				popupRect.yMin = Event.current.mousePosition.y + 10;
+				popupRect.size = new Vector2(200, 50);
+				GUI.Box(popupRect, string.Format(
+					"<b>{0}</b>",
+					popupSocket.GetDisplayName(editor.Graph))
+				);
+
+				GUI.skin.box.richText = richText;
+				GUI.skin.box.normal.textColor = color;
+				GUI.skin.box.alignment = alignment;
+			}
+		}
+
+		private static bool DrawMember
+			(bool isInput, GraphEditor editor, Node node, ref Rect rect,
+			SerializedObject serializedObject, Socket socket)
+		{
+			string name = node.GetSocketDisplayName(socket);
+			bool editable = node.GetSocketFlags(socket).IsEditable();
+			bool linked = editor.Graph.Links.IsSocketLinkedTo(socket);
+
+			if (editable && !linked)
+			{
+				rect.height = EditorGUIUtility.singleLineHeight;
+				var type = node.GetSocketType(socket);
+				var value = node.GetSocketValue(socket);
+
+				var prop = serializedObject.FindProperty(socket.FieldName);
+				if (prop != null)
+				{
+					EditorGUI.PropertyField(rect, prop, GUIContent.none, true);
+				}
+				else if (type == null)
+				{
+					GUI.enabled = false;
+					EditorGUI.TextField(rect, GUIContent.none, "Unknown Type");
+					GUI.enabled = true;
 				}
 				else
 				{
-					rect.height = EditorGUIUtility.singleLineHeight;
-					EditorGUI.LabelField(rect, name);
-					rect.y += rect.height + LINE_PADDING;
+					value = GUIExtension.DrawField
+						(rect, value, type, GUIContent.none, true);
+					node.SetSocketValue(socket, value);
 				}
+
 			}
+			else
+			{
+				rect.height = EditorGUIUtility.singleLineHeight;
+				EditorGUI.LabelField(rect, name);
+			}
+
+			return rect.Contains(Event.current.mousePosition);
+			
 		}
 
 		private static float GetPropertyHeights
