@@ -320,7 +320,6 @@ namespace Exodrifter.NodeGraph
 					{
 						Target = null;
 						GUI.FocusControl(null);
-						Event.current.Use();
 					}
 					break;
 
