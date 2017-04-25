@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Added the ability to drag and drop objects into the node graph
 * Added the `NodeGraphPolicy` class, which defines what operations a node
   graph can take
+* Added Rotate, RotateAround, and Translate nodes
+* Added Time nodes for getting delta times
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results
