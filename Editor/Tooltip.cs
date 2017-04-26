@@ -44,7 +44,6 @@ namespace Exodrifter.NodeGraph
 			var color = GUI.skin.box.normal.textColor;
 			var alignment = GUI.skin.box.alignment;
 			GUI.skin.box.richText = true;
-			GUI.skin.box.normal.textColor = Color.white;
 			GUI.skin.box.alignment = TextAnchor.UpperLeft;
 
 			var popupRect = new Rect();

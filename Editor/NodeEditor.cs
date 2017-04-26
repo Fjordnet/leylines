@@ -237,11 +237,12 @@ namespace Exodrifter
 			if (rect.Contains(Event.current.mousePosition) && editor.Target == null)
 			{
 				var text = string.Format(
-					"<color=#5bb><i>{0}</i></color> <b>{1}</b>\n{2}",
+					"<color=#4aa><i>{0}</i></color> <b>{1}</b>\n{2}",
 					node.GetSocketType(socket).Name,
 					node.GetSocketDisplayName(socket),
-					node.GetSocketDescription(socket)
-					?? "<color=#aaa><i>No documentation</i></color>"
+					string.IsNullOrEmpty(node.GetSocketDescription(socket))
+						? "<color=#777><i>No documentation</i></color>"
+						: node.GetSocketDescription(socket)
 				);
 				editor.Target = new Tooltip(text);
 			}
