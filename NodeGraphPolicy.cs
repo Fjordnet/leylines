@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -162,7 +163,7 @@ namespace Exodrifter.NodeGraph
 				var path = attribute.Path;
 				if (string.IsNullOrEmpty(path))
 				{
-					path = type.FullName.Replace('.', '/');
+					path = type.FullName.Replace('.', '/').Replace('+', '/');
 				}
 
 				ret[path] = () => {
@@ -211,11 +212,17 @@ namespace Exodrifter.NodeGraph
 				from assembly in AppDomain.CurrentDomain.GetAssemblies()
 				from type in assembly.GetTypes()
 				where AssemblyIsAllowed(assembly)
+				where !type.Name.StartsWith("<>") // Anonymous types
+				where !type.GetCustomAttributes(true).Any(t => t.GetType() == typeof(CompilerGeneratedAttribute))
+				where !typeof(Node).IsAssignableFrom(type) // Custom nodes
 				select type
 			).ToList();
 
 			foreach (var type in types)
 			{
+				var path = type.FullName.Replace('.', '/').Replace('+', '/');
+				ret[path] = () => { return CreateDynamicNode(type); };
+
 				var members =
 					from member in type.GetMembers()
 					where member.MemberType == MemberTypes.Field
@@ -225,6 +232,18 @@ namespace Exodrifter.NodeGraph
 
 				foreach (var member in members)
 				{
+					if (member is MethodInfo)
+					{
+						var method = (MethodInfo)member;
+
+						// Ignore special methods
+						if (method.IsSpecialName)
+						{
+							continue;
+						}
+					}
+
+					// Build the suffix
 					string suffix;
 					switch (member.MemberType)
 					{
@@ -240,11 +259,8 @@ namespace Exodrifter.NodeGraph
 							break;
 					}
 
-					var path = string.Format("{0}.{1}{2}",
-						type.FullName.Replace('.', '/'),
-						member.Name,
-						suffix
-						);
+					path = string.Format("{0}.{1}{2}",
+						path, member.Name, suffix);
 
 					ret[path] = () =>
 					{
@@ -256,6 +272,14 @@ namespace Exodrifter.NodeGraph
 			return ret;
 		}
 
+		private Node CreateDynamicNode(Type type)
+		{
+			var node = ScriptableObject.CreateInstance<DynamicNode>();
+			node.AddOutputSocket(new DynamicSocket(type, type.Name, null,
+				SocketFlags.AllowMultipleLinks | SocketFlags.Editable));
+			return node;
+		}
+
 		private Node CreateDynamicNode(Type type, MemberInfo member)
 		{
 			var node = ScriptableObject.CreateInstance<DynamicNode>();
@@ -263,7 +287,7 @@ namespace Exodrifter.NodeGraph
 			switch (member.MemberType)
 			{
 				case MemberTypes.Method:
-					node.name += "." + member.Name + "()";
+					node.name = type.Name + "." + member.Name + "()";
 
 					var method = (MethodInfo)member;
 					node.AddInputSocket(
@@ -293,29 +317,41 @@ namespace Exodrifter.NodeGraph
 					break;
 
 				case MemberTypes.Field:
-					node.name += "." + member.Name;
+					node.name = type.Name + "." + member.Name;
 
 					var field = (FieldInfo)member;
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, null, SocketFlags.Editable));
-
-					node.AddOutputSocket(
-						new DynamicSocket(field.FieldType, member.Name, null, SocketFlags.AllowMultipleLinks));
-
-					node.AddEvalInvoke(
-						new EvalInvoke(type.Name, "result", member.Name, InvokeType.GetProperty));
-					break;
-
-				case MemberTypes.Property:
-					node.name += "." + member.Name;
-
-					var property = (PropertyInfo)member;
+						new DynamicSocket(typeof(ExecType), "setExec"));
 					node.AddInputSocket(
 						new DynamicSocket(type, type.Name, null, SocketFlags.Editable));
 
 					node.AddOutputSocket(
-						new DynamicSocket(property.PropertyType, member.Name, null, SocketFlags.AllowMultipleLinks));
+						new DynamicSocket(typeof(ExecType), "execOut", null, SocketFlags.AllowMultipleLinks));
+					node.AddOutputSocket(
+						new DynamicSocket(field.FieldType, field.Name, null, SocketFlags.AllowMultipleLinks));
 
+					node.AddExecInvoke(
+						new ExecInvoke("setExec", "execOut", type.Name, "result", field.Name, InvokeType.SetField));
+					node.AddEvalInvoke(
+						new EvalInvoke(type.Name, "result", member.Name, InvokeType.GetField));
+					break;
+
+				case MemberTypes.Property:
+					node.name = type.Name + "." + member.Name;
+
+					var property = (PropertyInfo)member;
+					node.AddInputSocket(
+						new DynamicSocket(typeof(ExecType), "setExec"));
+					node.AddInputSocket(
+						new DynamicSocket(type, type.Name, null, SocketFlags.Editable));
+
+					node.AddOutputSocket(
+						new DynamicSocket(typeof(ExecType), "execOut", null, SocketFlags.AllowMultipleLinks));
+					node.AddOutputSocket(
+						new DynamicSocket(property.PropertyType, property.Name, null, SocketFlags.AllowMultipleLinks));
+
+					node.AddExecInvoke(
+						new ExecInvoke("setExec", "execOut", type.Name, "result", property.Name, InvokeType.SetProperty));
 					node.AddEvalInvoke(
 						new EvalInvoke(type.Name, "result", member.Name, InvokeType.GetProperty));
 					break;

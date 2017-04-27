@@ -116,14 +116,23 @@ namespace Exodrifter.NodeGraph
 			GUI.SetNextControlName("search_field");
 			searchStr = GUILayout.TextField(searchStr);
 			GUI.FocusControl("search_field");
-			GUILayout.EndHorizontal();
 
 			var results = (
 					from result in policy.SearchItems
-					orderby FuzzySearch(searchStr, result.Label) descending
-					select result
-				).ToList();
+					select new
+					{
+						S = FuzzySearch(searchStr, result.Label),
+						R = result
+					})
+					.Where(x => x.S != int.MinValue)
+					.OrderByDescending(x => x.S)
+					.Select(x => x.R)
+					.ToList();
+
 			selected = Mathf.Clamp(selected, 0, results.Count - 1);
+
+			GUILayout.Label("" + results.Count, GUILayout.ExpandWidth(false));
+			GUILayout.EndHorizontal();
 			
 			var oldRichText = GUI.skin.label.richText;
 			GUI.skin.label.richText = true;

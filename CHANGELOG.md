@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results
 * Node boxes include the label to make it easier to drag the node
+* Dynamic field and property nodes can now handle both set and get operations
+* Dynamic reflection no longer includes special methods, items marked with the
+  CompilerGeneratedAttribute, and any types that start with "<>", which are
+  commonly anonymous types
 
 ### Fixed
 * Fix dynamic node creation not working for overloaded methods
