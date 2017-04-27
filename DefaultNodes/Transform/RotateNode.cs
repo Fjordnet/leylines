@@ -12,7 +12,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("The transform to rotate.")]
 		[SerializeField, Input("Transform")]
 		internal Transform transform = null;
-		[Description("Defines the rotation as local or world.")]
+		[Description("Defines the rotation in local or world space.")]
 		[SerializeField, Input("Relative To")]
 		internal Space space = Space.Self;
 		[Description("The number of degrees to rotate by.")]

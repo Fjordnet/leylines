@@ -93,4 +93,20 @@ namespace Exodrifter.NodeGraph
 			Finished = seconds <= Elapsed;
 		}
 	}
+
+	/// <summary>
+	/// Yields until the next update loop
+	/// </summary>
+	public class WaitForUpdate : Yield
+	{
+		public WaitForUpdate()
+		{
+		}
+
+		public override void OnUpdate()
+		{
+			base.OnUpdate();
+			Finished = true;
+		}
+	}
 }
