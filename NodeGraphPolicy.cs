@@ -220,12 +220,18 @@ namespace Exodrifter.NodeGraph
 
 			foreach (var type in types)
 			{
-				var path = type.FullName.Replace('.', '/').Replace('+', '/');
+				var typePath = type.FullName.Replace('.', '/').Replace('+', '/');
+
+				// Ignore attribute types
+				if (typeof(Attribute).IsAssignableFrom(type))
+				{
+					continue;
+				}
 
 				// Allow variable node if type is not a static class
 				if (!type.IsAbstract || !type.IsSealed)
 				{
-					ret[path] = () => { return CreateDynamicNode(type); };
+					ret[typePath] = () => { return CreateDynamicNode(type); };
 				}
 
 				var members =
@@ -237,6 +243,13 @@ namespace Exodrifter.NodeGraph
 
 				foreach (var member in members)
 				{
+					// Ignore obselete members
+					if (member.GetCustomAttributes(true)
+						.Any(t => t.GetType() == typeof(ObsoleteAttribute)))
+					{
+						continue;
+					}
+
 					if (member is MethodInfo)
 					{
 						var method = (MethodInfo)member;
@@ -257,6 +270,12 @@ namespace Exodrifter.NodeGraph
 							break;
 						case MemberTypes.Field:
 						case MemberTypes.Property:
+
+							// Ignore enum fields and properties
+							if (type.IsEnum)
+							{
+								continue;
+							}
 							suffix = "";
 							break;
 						default:
@@ -264,10 +283,10 @@ namespace Exodrifter.NodeGraph
 							break;
 					}
 
-					path = string.Format("{0}.{1}{2}",
-						path, member.Name, suffix);
+					var memberPath = string.Format("{0}.{1}{2}",
+						typePath, member.Name, suffix);
 
-					ret[path] = () =>
+					ret[memberPath] = () =>
 					{
 						return CreateDynamicNode(type, member);
 					};
@@ -280,8 +299,11 @@ namespace Exodrifter.NodeGraph
 		private Node CreateDynamicNode(Type type)
 		{
 			var node = ScriptableObject.CreateInstance<DynamicNode>();
+			node.DisplayName = type.Name;
+
 			node.AddOutputSocket(new DynamicSocket(type, type.Name, null,
 				SocketFlags.AllowMultipleLinks | SocketFlags.Editable));
+
 			return node;
 		}
 
@@ -380,7 +402,7 @@ namespace Exodrifter.NodeGraph
 
 			return IsAllowedInFilter(assembly, assemblyFilters, (x) =>
 			{
-				return x.FullName;
+				return x.GetName().Name;
 			});
 		}
 

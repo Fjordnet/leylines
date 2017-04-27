@@ -143,12 +143,14 @@ namespace Exodrifter.NodeGraph
 			var newSearchStr = GUILayout.TextField(searchStr);
 			GUI.FocusControl("search_field");
 
+			bool doSearch = false;
 			if (results == null || string.IsNullOrEmpty(newSearchStr))
 			{
 				results = policy.SearchItems;
+				doSearch = true;
 			}
 
-			if (searchStr != newSearchStr)
+			if (doSearch || searchStr != newSearchStr)
 			{
 				if (newSearchStr.Length < searchStr.Length)
 				{
@@ -181,7 +183,7 @@ namespace Exodrifter.NodeGraph
 					scrollPos = selected;
 				}
 			}
-			scrollPos = Mathf.Clamp(scrollPos, 0, results.Count - 1);
+			scrollPos = Mathf.Clamp(scrollPos, 0, results.Count - 12);
 
 			GUILayout.Label("" + results.Count, GUILayout.ExpandWidth(false));
 			GUILayout.EndHorizontal();
@@ -193,7 +195,7 @@ namespace Exodrifter.NodeGraph
 			var scrollSize = GUI.skin.verticalScrollbar.fixedWidth;
 			GUILayout.BeginVertical();
 			// Show results
-			int index = Mathf.Clamp(Mathf.FloorToInt(scrollPos), 0, results.Count - 1);
+			int index = Mathf.Clamp((int)scrollPos, 0, results.Count - 1);
 			bool hoveringOnResult = false;
 			for (int i = index; i < Mathf.Min(index + 12, results.Count); ++i)
 			{
@@ -347,7 +349,7 @@ namespace Exodrifter.NodeGraph
 			int patternStart = 0, int stringStart = 0)
 		{
 			bool prev = false;
-			int bestScore = int.MinValue, score = 0, unmatched = 0;
+			int bestScore = int.MinValue, score = 0;
 			int pi = patternStart, si = stringStart;
 			while (pi < pattern.Length && si < str.Length)
 			{
@@ -379,10 +381,6 @@ namespace Exodrifter.NodeGraph
 				{
 					// Unmatched letter
 					score -= 1;
-					// Leading character
-					if (pi < 3 && unmatched < 9) {
-						unmatched -= 3;
-					}
 
 					prev = false;
 				}
@@ -397,8 +395,6 @@ namespace Exodrifter.NodeGraph
 
 			// Score remaining unmatched letters
 			score -= (str.Length - si) * 1;
-			// Add the unmatched leading character penalty
-			score += unmatched;
 
 			return Mathf.Max(score, bestScore);
 		}
