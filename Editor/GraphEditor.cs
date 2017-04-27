@@ -68,7 +68,14 @@ namespace Exodrifter.NodeGraph
 			}
 		}
 
-		public object Target { get; set; }
+		private object target;
+		public object Target
+		{
+			get { return target; }
+			set { PreviousTarget = target; target = value; }
+		}
+
+		public object PreviousTarget { get; set; }
 		public Vector2 Offset { get; set; }
 		public int Snap { get { return snap ? GRID_CELL_SIZE : 0; } }
 		public Vector2 GraphPosition { get; private set; }

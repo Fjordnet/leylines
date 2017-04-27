@@ -140,7 +140,7 @@ namespace Exodrifter
 					switch(Event.current.keyCode)
 					{
 						case KeyCode.Delete:
-							if (!ReferenceEquals(editor.Target, node))
+							if (!ReferenceEquals(editor.PreviousTarget, node))
 							{
 								break;
 							}
