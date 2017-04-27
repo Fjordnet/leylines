@@ -398,7 +398,7 @@ namespace Exodrifter.NodeGraph
 				// Detect ignore filters
 				if (pattern.StartsWith("!"))
 				{
-					pattern = filter.Substring(1, 0);
+					pattern = filter.Substring(1);
 					setTo = false;
 				}
 

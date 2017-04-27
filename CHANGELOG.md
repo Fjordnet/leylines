@@ -32,4 +32,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Fix NodeGraph editor losing reference to graph when entering play mode
 * Fix input sockets still being editable when they are linked to
 * Fix transparent box issue in Pro editor
+* Fix dynamic ignore filters not working
 
