@@ -190,7 +190,7 @@ namespace Exodrifter.NodeGraph
 					scrollPos = selected;
 				}
 			}
-			scrollPos = Mathf.Clamp(scrollPos, 0, results.Count - 12);
+			scrollPos = Mathf.Clamp(scrollPos, 0, Mathf.Max(0, results.Count - 12));
 
 			GUILayout.Label("" + results.Count, GUILayout.ExpandWidth(false));
 			GUILayout.EndHorizontal();
@@ -254,7 +254,9 @@ namespace Exodrifter.NodeGraph
 				GUI.skin.label.alignment = oldAlignment;
 			}
 			GUILayout.EndVertical();
-			scrollPos = GUILayout.VerticalScrollbar(scrollPos, 12, 0, results.Count, GUILayout.ExpandHeight(true));
+			scrollPos = GUILayout.VerticalScrollbar
+				(scrollPos, Mathf.Max(results.Count, 12),
+				0, Mathf.Max(results.Count, 12), GUILayout.ExpandHeight(true));
 			GUILayout.EndHorizontal();
 
 			GUI.skin.label.richText = oldRichText;
