@@ -35,6 +35,15 @@ namespace Exodrifter.NodeGraph
 			evaluatedIDs = new HashSet<int>();
 		}
 
+		/// <summary>
+		/// Creates a deep copy of another scope.
+		/// </summary>
+		public GraphScope(GraphScope other)
+		{
+			Values = new Dictionary<Socket, object>(other.Values);
+			evaluatedIDs = new HashSet<int>(other.evaluatedIDs);
+		}
+
 		public bool ShouldEvaluate(int nodeID)
 		{
 			return evaluatedIDs.Add(nodeID);

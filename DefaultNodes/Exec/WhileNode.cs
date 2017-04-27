@@ -25,9 +25,13 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		{
 			while (condition)
 			{
-				yield return new SignalSocket(scope, GetSocket("execTrue"));
+				// Create a copy of the scope to force re-eval every time this
+				// loops
+				var newScope = new GraphScope(scope);
 
-				// Force re-evaluation
+				yield return new SignalSocket(newScope, GetSocket("execTrue"));
+
+				// Force re-evaluation of this node
 				Eval(scope);
 			}
 		}
