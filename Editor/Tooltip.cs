@@ -40,20 +40,21 @@ namespace Exodrifter.NodeGraph
 		{
 			var content = new GUIContent(Text);
 
-			var richText = GUI.skin.box.richText;
-			var color = GUI.skin.box.normal.textColor;
+			var richText = GUI.skin.label.richText;
 			var alignment = GUI.skin.box.alignment;
-			GUI.skin.box.richText = true;
+			GUI.skin.label.richText = true;
 			GUI.skin.box.alignment = TextAnchor.UpperLeft;
+
+			var size = GUI.skin.label.CalcSize(content);
 
 			var popupRect = new Rect();
 			popupRect.xMin = Event.current.mousePosition.x + 10;
 			popupRect.yMin = Event.current.mousePosition.y + 10;
-			popupRect.size = GUI.skin.box.CalcSize(content);
-			GUI.Box(popupRect, content);
+			popupRect.size = size;
+			GUI.Box(popupRect, GUIContent.none);
+			GUI.Label(popupRect, content);
 
-			GUI.skin.box.richText = richText;
-			GUI.skin.box.normal.textColor = color;
+			GUI.skin.label.richText = richText;
 			GUI.skin.box.alignment = alignment;
 		}
 	}
