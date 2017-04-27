@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   member
 * Added Gate logic node
 * Added tooltips on sockets with type, name, and description information
+* Added a menu when no graph is loaded
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results

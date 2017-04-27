@@ -187,10 +187,12 @@ namespace Exodrifter.NodeGraph
 			GUILayout.BeginArea(topToolbarRect);
 			GUILayout.BeginHorizontal();
 
+			GUI.enabled = Graph != null;
 			if (GUILayout.Button("Save", GUILayout.MaxHeight(15)))
 			{
 				AssetDatabase.SaveAssets();
 			}
+			GUI.enabled = true;
 
 			var oldGraph = Graph;
 			Graph = EditorGUILayout.ObjectField(Graph, typeof(Graph), false) as Graph;
@@ -217,6 +219,7 @@ namespace Exodrifter.NodeGraph
 			GUILayout.BeginArea(bottomToolbarRect);
 			GUILayout.BeginHorizontal();
 
+			GUI.enabled = Graph != null;
 			snap = GUILayout.Toggle(snap, "Snap", GUI.skin.button);
 			if (GUILayout.Button("Center View"))
 			{
@@ -229,6 +232,7 @@ namespace Exodrifter.NodeGraph
 					CenterViewOn(Vector2.zero);
 				}
 			}
+			GUI.enabled = true;
 
 			GUILayout.FlexibleSpace();
 
@@ -300,7 +304,50 @@ namespace Exodrifter.NodeGraph
 
 				GUI.EndClip();
 
-				GUI.skin.box.normal.background = oldTex;
+			}
+
+			if (Graph == null)
+			{
+				CenterViewOn(Vector2.zero);
+
+				var menuRect = new Rect();
+				menuRect.size = new Vector2(300, 200);
+				menuRect.center = graphRect.center;
+				GUI.Box(menuRect, GUIContent.none);
+				GUILayout.BeginArea(menuRect);
+				GUILayout.FlexibleSpace();
+				GUILayout.BeginHorizontal(GUILayout.Height(150));
+				GUILayout.FlexibleSpace();
+				GUILayout.BeginVertical(GUILayout.Width(250));
+
+				GUILayout.FlexibleSpace();
+
+				GUILayout.BeginHorizontal();
+				var size = GUI.skin.label.fontSize;
+				var alignment = GUI.skin.label.alignment;
+				GUI.skin.label.fontSize = 20;
+				GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+				GUILayout.Label("Leylines");
+				GUI.skin.label.fontSize = size;
+				GUI.skin.label.alignment = alignment;
+				GUILayout.EndHorizontal();
+
+				GUILayout.FlexibleSpace();
+
+				GUILayout.BeginVertical(GUILayout.Height(130));
+				var rich = GUI.skin.label.richText;
+				GUI.skin.label.richText = true;
+				GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+				GUILayout.Label("<b>No Graph Loaded</b>");
+				GUI.skin.label.richText = rich;
+				GUI.skin.label.alignment = alignment;
+				GUILayout.EndVertical();
+
+				GUILayout.EndVertical();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndHorizontal();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndArea();
 			}
 
 			switch (Event.current.type)
@@ -312,6 +359,10 @@ namespace Exodrifter.NodeGraph
 					break;
 
 				case EventType.MouseDrag:
+					if (Graph == null)
+					{
+						break;
+					}
 					if (ReferenceEquals(Target, this))
 					{
 						Offset += Event.current.delta;
@@ -328,6 +379,10 @@ namespace Exodrifter.NodeGraph
 					break;
 
 				case EventType.ContextClick:
+					if (Graph == null)
+					{
+						break;
+					}
 					if (graphRect.Contains(Event.current.mousePosition))
 					{
 						var clipPos = Event.current.mousePosition;
@@ -375,6 +430,7 @@ namespace Exodrifter.NodeGraph
 					break;
 			}
 
+			GUI.skin.box.normal.background = oldTex;
 			Repaint();
 		}
 
