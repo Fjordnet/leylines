@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Added the ability to drag and drop objects into the node graph
 * Added the `NodeGraphPolicy` class, which defines what operations a node
   graph can take
-* Added Rotate, RotateAround, Translate, and MoveTo nodes
+* Added Rotate, RotateAround, Translate, MoveTo, If, and While nodes
 * Added Time nodes for getting delta times
 * Added popup to member fields in nodes that display the display name of the
   member

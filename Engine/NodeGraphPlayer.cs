@@ -113,26 +113,22 @@ namespace Exodrifter.NodeGraph
 
 			// Execute the next node
 			var yield = destination.Exec(from, to, scope);
-			while (yield.MoveNext()) yield return yield.Current;
-
-			// Check if execution is finished
-			if (yield.Current == null)
+			while (yield.MoveNext())
 			{
-				yield break;
-			}
+				// Check if we should signal the next socket
+				var signal = yield.Current as SignalSocket;
+				if (signal != null)
+				{
+					var newFrom = signal.Socket;
+					foreach (var newTo in Graph.Links.HasSocketAsSource(newFrom))
+					{
+						var newYield = Exec(newFrom, newTo, scope);
+						while (newYield.MoveNext()) yield return newYield.Current;
+					}
+				}
 
-			var signal = yield.Current as SignalSocket;
-			if (signal == null)
-			{
-				yield break;
-			}
-
-			// Continue execution
-			var newFrom = signal.Socket;
-			foreach (var newTo in Graph.Links.HasSocketAsSource(newFrom))
-			{
-				yield = Exec(newFrom, newTo, scope);
-				while (yield.MoveNext()) yield return yield.Current;
+				// Wait for this yield to return
+				yield return yield.Current;
 			}
 		}
 
