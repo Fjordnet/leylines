@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Added a menu when no graph is loaded
 * If the control key is down while clicking on a socket, all links to that
   socket are removed
+* Search box can now be used by both keyboard and mouse
+* Search box now has a scrollbar and can be scrolled by keyboard and mouse
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results

@@ -124,15 +124,27 @@ namespace Exodrifter.NodeGraph
 
 		#endregion
 
+		[SerializeField]
+		private Texture2D oldTex;
+		[SerializeField]
 		private Texture2D boxTexture;
 
 		void OnGUI()
 		{
-			// Make the box texture opaque
+			// Looks like the editor crashed before setting back the old
+			// texture at the end of the method
 			var oldTex = GUI.skin.box.normal.background;
+			if (oldTex == null)
+			{
+				oldTex = this.oldTex;
+				GUI.skin.box.normal.background = oldTex;
+			}
+			this.oldTex = oldTex;
+
+			// Make the box texture opaque
 			if (EditorGUIUtility.isProSkin)
 			{
-				if (boxTexture == null)
+				if (boxTexture == null && oldTex != null)
 				{
 					// Make a copy of the old texture
 					var tmp = RenderTexture.GetTemporary(oldTex.width, oldTex.height);
@@ -310,7 +322,6 @@ namespace Exodrifter.NodeGraph
 				search.OnGUI(this);
 
 				GUI.EndClip();
-
 			}
 
 			if (Graph == null)

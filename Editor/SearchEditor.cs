@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEditor;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace Exodrifter.NodeGraph
@@ -24,6 +20,8 @@ namespace Exodrifter.NodeGraph
 		private int selected = 0;
 		[SerializeField]
 		private NodeGraphPolicy policy;
+		[SerializeField]
+		private float scrollPos;
 
 		private Texture2D highlight;
 
@@ -92,10 +90,11 @@ namespace Exodrifter.NodeGraph
 			GUILayout.BeginVertical();
 
 			// Detect key events before the text field
-			switch(Event.current.type)
+			var keysUsed = false;
+			switch (Event.current.type)
 			{
 				case EventType.KeyDown:
-					switch(Event.current.keyCode)
+					switch (Event.current.keyCode)
 					{
 						case KeyCode.UpArrow:
 							selected--;
@@ -106,7 +105,29 @@ namespace Exodrifter.NodeGraph
 							selected++;
 							Event.current.Use();
 							break;
+
+						case KeyCode.Home:
+							selected = 0;
+							Event.current.Use();
+							break;
+
+						case KeyCode.End:
+							selected = int.MaxValue;
+							Event.current.Use();
+							break;
+
+						case KeyCode.PageUp:
+							selected -= 11;
+							Event.current.Use();
+							break;
+
+						case KeyCode.PageDown:
+							selected += 11;
+							Event.current.Use();
+							break;
 					}
+
+					keysUsed = Event.current.type == EventType.Used;
 
 					break;
 			}
@@ -130,6 +151,18 @@ namespace Exodrifter.NodeGraph
 					.ToList();
 
 			selected = Mathf.Clamp(selected, 0, results.Count - 1);
+			if (keysUsed)
+			{
+				if (selected > Mathf.FloorToInt(scrollPos) + 11)
+				{
+					scrollPos = selected - 11;
+				}
+				else if (selected < scrollPos)
+				{
+					scrollPos = selected;
+				}
+			}
+			scrollPos = Mathf.Clamp(scrollPos, 0, results.Count - 1);
 
 			GUILayout.Label("" + results.Count, GUILayout.ExpandWidth(false));
 			GUILayout.EndHorizontal();
@@ -137,16 +170,20 @@ namespace Exodrifter.NodeGraph
 			var oldRichText = GUI.skin.label.richText;
 			GUI.skin.label.richText = true;
 
+			GUILayout.BeginHorizontal();
+			var scrollSize = GUI.skin.verticalScrollbar.fixedWidth;
 			GUILayout.BeginVertical();
 			// Show results
-			for (int i = 0; i < results.Count; ++i)
+			int index = Mathf.FloorToInt(scrollPos);
+			bool hoveringOnResult = false;
+			for (int i = index; i < Mathf.Min(index + 12, results.Count); ++i)
 			{
 				var result = results[i];
 
+				GUIStyle style = new GUIStyle(GUI.skin.label);
 				var oldColor = GUI.skin.label.normal.textColor;
 				if (i == selected)
 				{
-					GUIStyle style = new GUIStyle(GUI.skin.label);
 					style.normal.background = GetHighlightTex();
 
 					GUILayout.BeginHorizontal(style);
@@ -155,20 +192,27 @@ namespace Exodrifter.NodeGraph
 				}
 				else
 				{
-					GUILayout.BeginHorizontal();
+					GUILayout.BeginHorizontal(style);
 				}
 
-				GUILayout.Label("" + FuzzySearch(searchStr, result.Label),
-					GUILayout.ExpandWidth(false));
-				GUILayout.Label(FuzzyHighlight(searchStr, result.Label),
-					GUILayout.ExpandWidth(true));
+				var label = FuzzySearch(searchStr, result.Label) + " "
+					+ FuzzyHighlight(searchStr, result.Label);
+				GUILayout.Label(label, GUILayout.Width(rect.width - scrollSize
+					- style.padding.left * 3 - style.padding.right * 3));
 				GUILayout.EndHorizontal();
 
-				GUI.skin.label.normal.textColor = oldColor;
-
-				if (i == 20) {
-					break;
+				var lastRect = GUILayoutUtility.GetLastRect();
+				if (lastRect.Contains(Event.current.mousePosition))
+				{
+					if (Event.current.type == EventType.MouseMove)
+					{
+						selected = i;
+						Event.current.Use();
+					}
+					hoveringOnResult = selected == i;
 				}
+
+				GUI.skin.label.normal.textColor = oldColor;
 			}
 			// No results
 			if (results.Count == 0) {
@@ -180,6 +224,8 @@ namespace Exodrifter.NodeGraph
 				GUI.skin.label.alignment = oldAlignment;
 			}
 			GUILayout.EndVertical();
+			scrollPos = GUILayout.VerticalScrollbar(scrollPos, 12, 0, results.Count, GUILayout.ExpandHeight(true));
+			GUILayout.EndHorizontal();
 
 			GUI.skin.label.richText = oldRichText;
 
@@ -189,7 +235,13 @@ namespace Exodrifter.NodeGraph
 			switch (Event.current.type)
 			{
 				case EventType.MouseDown:
-					if (rect.Contains(Event.current.mousePosition))
+					if (hoveringOnResult)
+					{
+						var node = results[selected].MakeNode();
+						editor.AddNode(node, spawnPosition);
+						Close();
+					}
+					else if (rect.Contains(Event.current.mousePosition))
 					{
 						editor.Target = this;
 						Event.current.Use();
@@ -202,6 +254,11 @@ namespace Exodrifter.NodeGraph
 						editor.Target = this;
 						Event.current.Use();
 					}
+					break;
+
+				case EventType.ScrollWheel:
+					scrollPos += Event.current.delta.y;
+					Event.current.Use();
 					break;
 
 				// Detect key events in the search field

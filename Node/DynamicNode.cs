@@ -27,7 +27,6 @@ using UnityEngine;
 
 namespace Exodrifter.NodeGraph
 {
-	[Node(Name = "Dynamic Node", Path = "Other/Dynamic")]
 	public class DynamicNode : Node
 	{
 		[SerializeField]
