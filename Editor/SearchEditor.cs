@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Exodrifter.NodeGraph
@@ -22,6 +23,9 @@ namespace Exodrifter.NodeGraph
 		private NodeGraphPolicy policy;
 		[SerializeField]
 		private float scrollPos;
+
+		[SerializeField]
+		private List<SearchResult> results = new List<SearchResult>();
 
 		private Texture2D highlight;
 
@@ -70,7 +74,8 @@ namespace Exodrifter.NodeGraph
 
 		public void OnGUI(GraphEditor editor)
 		{
-			if (editor.Target != this) {
+			if (editor.Target != this)
+			{
 				Close();
 				return;
 			}
@@ -135,20 +140,34 @@ namespace Exodrifter.NodeGraph
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Search:", GUILayout.ExpandWidth(false));
 			GUI.SetNextControlName("search_field");
-			searchStr = GUILayout.TextField(searchStr);
+			var newSearchStr = GUILayout.TextField(searchStr);
 			GUI.FocusControl("search_field");
 
-			var results = (
-					from result in policy.SearchItems
+			if (results == null || string.IsNullOrEmpty(newSearchStr))
+			{
+				results = policy.SearchItems;
+			}
+
+			if (searchStr != newSearchStr)
+			{
+				if (newSearchStr.Length < searchStr.Length)
+				{
+					results = policy.SearchItems;
+				}
+
+				results = (
+					from result in results
 					select new
 					{
-						S = FuzzySearch(searchStr, result.Label),
+						S = FuzzySearch(newSearchStr, result.Label),
 						R = result
 					})
 					.Where(x => x.S != int.MinValue)
 					.OrderByDescending(x => x.S)
 					.Select(x => x.R)
 					.ToList();
+			}
+			searchStr = newSearchStr;
 
 			selected = Mathf.Clamp(selected, 0, results.Count - 1);
 			if (keysUsed)
@@ -174,20 +193,21 @@ namespace Exodrifter.NodeGraph
 			var scrollSize = GUI.skin.verticalScrollbar.fixedWidth;
 			GUILayout.BeginVertical();
 			// Show results
-			int index = Mathf.FloorToInt(scrollPos);
+			int index = Mathf.Clamp(Mathf.FloorToInt(scrollPos), 0, results.Count - 1);
 			bool hoveringOnResult = false;
 			for (int i = index; i < Mathf.Min(index + 12, results.Count); ++i)
 			{
 				var result = results[i];
 
 				GUIStyle style = new GUIStyle(GUI.skin.label);
+				var oldAlignment = GUI.skin.label.alignment;
 				var oldColor = GUI.skin.label.normal.textColor;
+				GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 				if (i == selected)
 				{
 					style.normal.background = GetHighlightTex();
 
 					GUILayout.BeginHorizontal(style);
-
 					GUI.skin.label.normal.textColor = Color.white;
 				}
 				else
@@ -213,6 +233,7 @@ namespace Exodrifter.NodeGraph
 				}
 
 				GUI.skin.label.normal.textColor = oldColor;
+				GUI.skin.label.alignment = oldAlignment;
 			}
 			// No results
 			if (results.Count == 0) {

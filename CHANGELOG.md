@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   socket are removed
 * Search box can now be used by both keyboard and mouse
 * Search box now has a scrollbar and can be scrolled by keyboard and mouse
+* Search results are cached when the search string is made longer, which
+  will reduce query time
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results
