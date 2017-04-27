@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Added Time nodes for getting delta times
 * Added popup to member fields in nodes that display the display name of the
   member
-* Added Gate logic node
+* Added Gate and If logic nodes
 * Added tooltips on sockets with type, name, and description information
 * Added a menu when no graph is loaded
 
