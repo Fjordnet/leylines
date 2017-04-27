@@ -152,7 +152,14 @@ namespace Exodrifter.NodeGraph
 
 			if (doSearch || searchStr != newSearchStr)
 			{
+				// Restart the search if the new string is shorter
 				if (newSearchStr.Length < searchStr.Length)
+				{
+					results = policy.SearchItems;
+				}
+
+				// Restart the search if the new string is a different sequence
+				else if (newSearchStr.Substring(0, searchStr.Length) != searchStr)
 				{
 					results = policy.SearchItems;
 				}
