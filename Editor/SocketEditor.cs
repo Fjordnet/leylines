@@ -39,7 +39,14 @@ namespace Exodrifter.NodeGraph
 				case EventType.MouseDown:
 					if (rect.Contains(Event.current.mousePosition))
 					{
-						editor.Target = socket;
+						if (Event.current.control)
+						{
+							editor.Graph.Links.RemoveAllWith(socket);
+						}
+						else
+						{
+							editor.Target = socket;
+						}
 						Event.current.Use();
 					}
 					break;

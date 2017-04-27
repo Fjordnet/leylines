@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Added Gate and If logic nodes
 * Added tooltips on sockets with type, name, and description information
 * Added a menu when no graph is loaded
+* If the control key is down while clicking on a socket, all links to that
+  socket are removed
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results
