@@ -221,7 +221,12 @@ namespace Exodrifter.NodeGraph
 			foreach (var type in types)
 			{
 				var path = type.FullName.Replace('.', '/').Replace('+', '/');
-				ret[path] = () => { return CreateDynamicNode(type); };
+
+				// Allow variable node if type is not a static class
+				if (!type.IsAbstract || !type.IsSealed)
+				{
+					ret[path] = () => { return CreateDynamicNode(type); };
+				}
 
 				var members =
 					from member in type.GetMembers()
