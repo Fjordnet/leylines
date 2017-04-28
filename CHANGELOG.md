@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   CompilerGeneratedAttribute, and any types that start with "<>", which are
   commonly anonymous types
 * The width of nodes is now determined by the node instead of the sockets
+* Various performance improvements for the NodePlayer
 
 ### Fixed
 * Fix dynamic node creation not working for overloaded methods

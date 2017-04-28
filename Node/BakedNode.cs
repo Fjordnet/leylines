@@ -58,8 +58,14 @@ namespace Exodrifter.NodeGraph
 
 		#endregion
 
+		private Socket[] cachedInputs;
 		public override Socket[] GetInputSockets()
 		{
+			if (cachedInputs != null)
+			{
+				return cachedInputs;
+			}
+
 			var ret = new List<Socket>();
 			var fields = GetFields<InputAttribute>();
 
@@ -68,11 +74,18 @@ namespace Exodrifter.NodeGraph
 				ret.Add(new Socket(ID, field.Name));
 			}
 
-			return ret.ToArray();
+			cachedInputs = ret.ToArray();
+			return cachedInputs;
 		}
 
+		private Socket[] cachedOutputs;
 		public override Socket[] GetOutputSockets()
 		{
+			if (cachedOutputs != null)
+			{
+				return cachedOutputs;
+			}
+
 			var ret = new List<Socket>();
 			var fields = GetFields<OutputAttribute>();
 
@@ -81,7 +94,8 @@ namespace Exodrifter.NodeGraph
 				ret.Add(new Socket(ID, field.Name));
 			}
 
-			return ret.ToArray();
+			cachedOutputs = ret.ToArray();
+			return cachedOutputs;
 		}
 
 		public override Socket GetSocket(string name)
@@ -89,8 +103,14 @@ namespace Exodrifter.NodeGraph
 			return new Socket(ID, name);
 		}
 
+		private Socket[] cachedSockets;
 		public override Socket[] GetSockets()
 		{
+			if (cachedSockets != null)
+			{
+				return cachedSockets;
+			}
+
 			var ret = new List<Socket>();
 			var fields = GetFields<SocketAttribute>();
 
@@ -99,7 +119,8 @@ namespace Exodrifter.NodeGraph
 				ret.Add(new Socket(ID, field.Name));
 			}
 
-			return ret.ToArray();
+			cachedSockets = ret.ToArray();
+			return cachedSockets;
 		}
 
 		#region Socket Properties
@@ -154,8 +175,15 @@ namespace Exodrifter.NodeGraph
 
 		#region Util
 
+		private Dictionary<string, FieldInfo> fieldCache;
 		private FieldInfo GetField(string name)
 		{
+			fieldCache = fieldCache ?? new Dictionary<string, FieldInfo>();
+			if (fieldCache.ContainsKey(name))
+			{
+				return fieldCache[name];
+			}
+
 			var flags = BindingFlags.NonPublic | BindingFlags.Instance;
 			var field = GetType().GetField(name, flags);
 
@@ -164,10 +192,12 @@ namespace Exodrifter.NodeGraph
 			{
 				if (attr is SocketAttribute)
 				{
+					fieldCache[name] = field;
 					return field;
 				}
 			}
 
+			fieldCache[name] = null;
 			return null;
 		}
 
