@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Exodrifter.NodeGraph.DefaultNodes
@@ -7,7 +8,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	public class MoveToNode : BakedNode
 	{
 		[Description("The input signal.")]
-		[SerializeField, Input("Exec", (SocketFlags)0)]
+		[SerializeField, Input("Exec", 0)]
 		internal ExecType execIn = ExecType.None;
 		[Description("The transform to translate.")]
 		[SerializeField, Input("Transform")]
@@ -27,6 +28,9 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("If true, ignore time scaling.")]
 		[SerializeField, Input("Ignore Time Scale")]
 		internal bool ignoreTimeScale = false;
+		[Description("If true, wait until done moving before invoking the output signal.")]
+		[SerializeField, Input("Wait Until Done")]
+		internal bool waitUntilDone = false;
 
 		[Description("The output signal.")]
 		[SerializeField, Output("Exec")]
@@ -40,49 +44,24 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		public override IEnumerator<Yield> Exec
 			(Socket from, Socket to, GraphScope scope)
 		{
-			Vector3 a, b;
-			var elapsed = 0f;
+			var agent = new GameObject().AddComponent<MoveToNodeAgent>();
+			agent.target = transform;
+			agent.relativeTo = relativeTo;
+			agent.destination = destination;
+			agent.seconds = seconds;
+			agent.easing = easing;
+			agent.ignoreTimeScale = ignoreTimeScale;
+			agent.Move();
 
-			switch (relativeTo)
+			if (waitUntilDone)
 			{
-				case Space.Self:
-					a = transform.localPosition;
-					b = destination;
-
-					while (elapsed < seconds)
-					{
-						var t = elapsed / seconds;
-						t = easing.Interpolate(t);
-						transform.localPosition = Vector3.LerpUnclamped(a, b, t);
-
-						yield return new WaitForUpdate();
-
-						elapsed += ignoreTimeScale
-							? Time.deltaTime : Time.unscaledDeltaTime;
-					}
-
-					transform.localPosition = b;
-
-					break;
-
-				case Space.World:
-					a = transform.position;
-					b = destination;
-
-					while (elapsed < seconds)
-					{
-						var t = elapsed / seconds;
-						t = easing.Interpolate(t);
-						transform.position = Vector3.LerpUnclamped(a, b, t);
-
-						yield return new WaitForUpdate();
-
-						elapsed += ignoreTimeScale
-							? Time.deltaTime : Time.unscaledDeltaTime;
-					}
-
-					transform.position = b;
-					break;
+				float elapsed = 0;
+				while (elapsed < seconds)
+				{
+					yield return new WaitForUpdate();
+					elapsed += ignoreTimeScale
+						? Time.deltaTime : Time.unscaledDeltaTime;
+				}
 			}
 
 			transformOut = transform;
@@ -90,5 +69,75 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		}
 
 		#endregion
+
+		private class MoveToNodeAgent : MonoBehaviour
+		{
+			public Transform target = null;
+			public Space relativeTo = Space.Self;
+			public Vector3 destination = Vector3.zero;
+			public float seconds = 1;
+			public Easings.Easing easing = Easings.Easing.Linear;
+			public bool ignoreTimeScale = false;
+
+			private void Awake()
+			{
+				gameObject.hideFlags = HideFlags.HideAndDontSave;
+			}
+
+			public void Move()
+			{
+				StartCoroutine(MoveRoutine());
+			}
+
+			private IEnumerator MoveRoutine()
+			{
+				Vector3 a, b;
+				var elapsed = 0f;
+
+				switch (relativeTo)
+				{
+					case Space.Self:
+						a = target.localPosition;
+						b = destination;
+
+						while (elapsed < seconds)
+						{
+							var t = elapsed / seconds;
+							t = easing.Interpolate(t);
+							target.localPosition = Vector3.LerpUnclamped(a, b, t);
+
+							yield return new WaitForEndOfFrame();
+
+							elapsed += ignoreTimeScale
+								? Time.deltaTime : Time.unscaledDeltaTime;
+						}
+
+						target.localPosition = b;
+
+						break;
+
+					case Space.World:
+						a = target.position;
+						b = destination;
+
+						while (elapsed < seconds)
+						{
+							var t = elapsed / seconds;
+							t = easing.Interpolate(t);
+							target.position = Vector3.LerpUnclamped(a, b, t);
+
+							yield return new WaitForEndOfFrame();
+
+							elapsed += ignoreTimeScale
+								? Time.deltaTime : Time.unscaledDeltaTime;
+						}
+
+						target.position = b;
+						break;
+				}
+
+				DestroyImmediate(gameObject);
+			}
+		}
 	}
 }

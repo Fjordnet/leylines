@@ -201,6 +201,7 @@ namespace Exodrifter
 			}
 		}
 
+		private static bool usedClipboard = false;
 		private static void DrawMember
 			(bool isInput, GraphEditor editor, Node node, ref Rect rect,
 			SerializedObject serializedObject, Socket socket)
@@ -230,6 +231,7 @@ namespace Exodrifter
 							{
 								if (Event.current.button == 0)
 								{
+									usedClipboard = true;
 									if (clipboardHasValue)
 									{
 										value = editor.Clipboard[type];
@@ -238,6 +240,7 @@ namespace Exodrifter
 								}
 								else if (Event.current.button == 1)
 								{
+									usedClipboard = true;
 									editor.Clipboard[type] = value;
 								}
 
@@ -246,7 +249,11 @@ namespace Exodrifter
 							break;
 
 						case EventType.MouseUp:
-							Event.current.Use();
+							if (usedClipboard)
+							{
+								usedClipboard = false;
+								Event.current.Use();
+							}
 							break;
 					}
 				}
