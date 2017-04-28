@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   commonly anonymous types
 * The width of nodes is now determined by the node instead of the sockets
 * Various performance improvements for the NodeGraphPlayer and GraphEditor
+* Nodes always show the label of toggles now
 
 ### Fixed
 * Fix dynamic node creation not working for overloaded methods

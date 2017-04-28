@@ -259,7 +259,12 @@ namespace Exodrifter
 				}
 
 				var prop = serializedObject.FindProperty(socket.FieldName);
-				if (prop != null)
+				if (type == typeof(bool))
+				{
+					value = EditorGUI.ToggleLeft(rect, name, (bool)value);
+					node.SetSocketValue(socket, value);
+				}
+				else if (prop != null)
 				{
 					EditorGUI.PropertyField(rect, prop, GUIContent.none, true);
 				}
@@ -358,9 +363,19 @@ namespace Exodrifter
 				}
 				else if (node.GetSocketFlags(socket).IsEditable())
 				{
-					float width = isInput ? node.InputWidth : node.OutputWidth;
-					max = max ?? width;
-					max = Mathf.Max(max.Value, width);
+					if (type == typeof(bool))
+					{
+						var name = node.GetSocketDisplayName(socket);
+						float width = GUI.skin.toggle.CalcSize(new GUIContent(name)).x;
+						max = max ?? width;
+						max = Mathf.Max(max.Value, width);
+					}
+					else
+					{
+						float width = isInput ? node.InputWidth : node.OutputWidth;
+						max = max ?? width;
+						max = Mathf.Max(max.Value, width);
+					}
 				}
 				else
 				{
