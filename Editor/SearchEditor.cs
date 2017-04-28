@@ -202,7 +202,7 @@ namespace Exodrifter.NodeGraph
 			var scrollSize = GUI.skin.verticalScrollbar.fixedWidth;
 			GUILayout.BeginVertical();
 			// Show results
-			int index = Mathf.Clamp((int)scrollPos, 0, results.Count - 1);
+			int index = Mathf.Clamp((int)scrollPos, 0, results.Count);
 			bool hoveringOnResult = false;
 			for (int i = index; i < Mathf.Min(index + 12, results.Count); ++i)
 			{
