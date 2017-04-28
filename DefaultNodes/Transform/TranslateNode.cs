@@ -14,7 +14,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		internal Transform transform = null;
 		[Description("Defines the translation in local or world space.")]
 		[SerializeField, Input("Relative To")]
-		internal Transform relativeTo = null;
+		internal Space relativeTo = Space.Self;
 		[Description("The number of meters to translate by.")]
 		[SerializeField, Input("Meters")]
 		internal Vector3 meters = Vector3.zero;
