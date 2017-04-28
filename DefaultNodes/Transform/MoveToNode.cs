@@ -55,12 +55,9 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 
 			if (waitUntilDone)
 			{
-				float elapsed = 0;
-				while (elapsed < seconds)
+				while (!Util.IsNull(agent))
 				{
 					yield return new WaitForUpdate();
-					elapsed += ignoreTimeScale
-						? Time.deltaTime : Time.unscaledDeltaTime;
 				}
 			}
 
