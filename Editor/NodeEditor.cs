@@ -37,6 +37,7 @@ namespace Exodrifter
 
 		public static void DrawNode(GraphEditor editor, Node node)
 		{
+			GUI.enabled = !editor.search.IsOpen;
 			EditorGUI.BeginChangeCheck();
 
 			if (Util.IsNull(node))
@@ -97,72 +98,77 @@ namespace Exodrifter
 			DrawMembers(false, editor, node, rightRect, serializedObject, outputs);
 
 			rect = fullRect;
-			switch (Event.current.type)
+			if (!editor.search.IsOpen)
 			{
-				case EventType.MouseDown:
-					if (rect.Contains(Event.current.mousePosition))
-					{
-						editor.Target = node;
-						Event.current.Use();
-					}
-					break;
-
-				case EventType.MouseDrag:
-					if (ReferenceEquals(editor.Target, node))
-					{
-						Undo.RecordObject(node, "Move " + node.GetType().Name);
-
-						if (editor.Snap <= 0)
+				switch (Event.current.type)
+				{
+					case EventType.MouseDown:
+						if (rect.Contains(Event.current.mousePosition))
 						{
-							node.XPos += (int)Event.current.delta.x;
-							node.YPos -= (int)Event.current.delta.y;
+							editor.Target = node;
+							Event.current.Use();
 						}
-						else
+						break;
+
+					case EventType.MouseDrag:
+						if (ReferenceEquals(editor.Target, node))
 						{
-							var graphPos = editor.GraphPosition;
-							node.XPos = Mathf.RoundToInt(graphPos.x / editor.Snap) * editor.Snap;
-							node.YPos = Mathf.RoundToInt(graphPos.y / editor.Snap) * editor.Snap;
-						}
+							Undo.RecordObject(node, "Move " + node.GetType().Name);
 
-						Event.current.Use();
-					}
-					break;
-
-				case EventType.MouseUp:
-					if (ReferenceEquals(editor.Target, node))
-					{
-						editor.Target = null;
-						Event.current.Use();
-					}
-					break;
-
-				case EventType.KeyDown:
-					switch(Event.current.keyCode)
-					{
-						case KeyCode.Delete:
-							if (!ReferenceEquals(editor.PreviousTarget, node))
+							if (editor.Snap <= 0)
 							{
-								break;
+								node.XPos += (int)Event.current.delta.x;
+								node.YPos -= (int)Event.current.delta.y;
+							}
+							else
+							{
+								var graphPos = editor.GraphPosition;
+								node.XPos = Mathf.RoundToInt(graphPos.x / editor.Snap) * editor.Snap;
+								node.YPos = Mathf.RoundToInt(graphPos.y / editor.Snap) * editor.Snap;
 							}
 
-							using (new UndoStack("Remove " + node.DisplayName + " Node"))
-							{
-								Undo.RegisterCompleteObjectUndo(editor.Graph, null);
-								Undo.DestroyObjectImmediate(node);
-							}
-							editor.Graph.Links.RemoveAllWith(node);
-							editor.Graph.Nodes.Remove(node);
+							Event.current.Use();
+						}
+						break;
+
+					case EventType.MouseUp:
+						if (ReferenceEquals(editor.Target, node))
+						{
 							editor.Target = null;
 							Event.current.Use();
-							break;
-					}
-					break;
+						}
+						break;
+
+					case EventType.KeyDown:
+						switch (Event.current.keyCode)
+						{
+							case KeyCode.Delete:
+								if (!ReferenceEquals(editor.PreviousTarget, node))
+								{
+									break;
+								}
+
+								using (new UndoStack("Remove " + node.DisplayName + " Node"))
+								{
+									Undo.RegisterCompleteObjectUndo(editor.Graph, null);
+									Undo.DestroyObjectImmediate(node);
+								}
+								editor.Graph.Links.RemoveAllWith(node);
+								editor.Graph.Nodes.Remove(node);
+								editor.Target = null;
+								Event.current.Use();
+								break;
+						}
+						break;
+				}
 			}
 
 			if (EditorGUI.EndChangeCheck())
 			{
 				serializedObject.ApplyModifiedProperties();
 			}
+
+			GUI.enabled = true;
 		}
 
 		private static void DrawMembers
@@ -206,7 +212,8 @@ namespace Exodrifter
 			rect.height = EditorGUIUtility.singleLineHeight;
 
 			var clipboardHasValue = false;
-			var hovering = rect.Contains(Event.current.mousePosition);
+			var hovering = rect.Contains(Event.current.mousePosition)
+				&& !editor.search.IsOpen;
 			if (editable && !linked)
 			{
 				var type = node.GetSocketType(socket);

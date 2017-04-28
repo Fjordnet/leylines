@@ -97,7 +97,7 @@ namespace Exodrifter.NodeGraph
 		public const int TOOLBAR_HEIGHT = 23;
 
 		private bool snap = false;
-		private SearchEditor search = new SearchEditor(new Vector2(500, 300));
+		public SearchEditor search = new SearchEditor(new Vector2(500, 300));
 
 		public Dictionary<Socket, Rect> rectCache;
 

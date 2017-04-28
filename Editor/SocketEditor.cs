@@ -29,10 +29,13 @@ namespace Exodrifter.NodeGraph
 		public static void DrawSocket
 			(GraphEditor editor, Node node, Socket socket, Rect rect)
 		{
-			var graph = editor.Graph;
 			GUI.Box(rect, GUIContent.none);
-
 			editor.rectCache[socket] = rect;
+
+			if (!GUI.enabled)
+			{
+				return;
+			}
 
 			switch (Event.current.type)
 			{
@@ -72,6 +75,9 @@ namespace Exodrifter.NodeGraph
 						editor.Target = null;
 						break;
 					}
+
+					var graph = editor.Graph;
+
 					if (socket.IsInput(graph) == otherSocket.IsInput(graph))
 					{
 						editor.Target = null;
