@@ -34,12 +34,9 @@ namespace Exodrifter.NodeGraph
 	public class SocketBimap : IEnumerable<Link>
 	{
 		[SerializeField]
-		private List<Link> links;
+		private List<Link> links = new List<Link>();
 
-		public SocketBimap()
-		{
-			links = new List<Link>();
-		}
+		#region Operations
 
 		/// <summary>
 		/// Adds a new link specified by the two sockets
@@ -57,77 +54,24 @@ namespace Exodrifter.NodeGraph
 				return false;
 			}
 
+			InitCache();
+
 			var link = new Link(graph, from, to);
-			if (!links.Contains(link))
+			if (fromToCache.ContainsKey(from))
 			{
-				links.Add(link);
-				return true;
-			}
-			return false;
-		}
-
-		/// <summary>
-		/// Returns true if the link specified by the two sockets exists.
-		/// </summary>
-		/// <param name="graph">The graph these sockets are in.</param>
-		/// <param name="a">The first socket in the link.</param>
-		/// <param name="b">The second socket in the link.</param>
-		/// <returns>True if that link specified by the two sockets exists.</returns>
-		public bool Contains(Graph graph, Socket a, Socket b)
-		{
-			var from = a.IsInput(graph) ? b : a;
-			var to = a.IsInput(graph) ? a : b;
-
-			return links.Contains(new Link(graph, from, to));
-		}
-
-		/// <summary>
-		/// Return a list of sockets that have the specified socket as a source.
-		/// </summary>
-		/// <param name="socket">The socket to use as the source.</param>
-		/// <returns>
-		/// A list of sockets that have a specified socket as a source.
-		/// </returns>
-		public Socket[] HasSocketAsSource(Socket socket)
-		{
-			return links
-				.Where(t => { return t.FromSocket == socket; })
-				.Select(t => { return t.ToSocket; })
-				.ToArray();
-		}
-
-		/// <summary>
-		/// Return a list of sockets that have the specified socket as a
-		/// destination.
-		/// </summary>
-		/// <param name="socket">The socket to use as the destination.</param>
-		/// <returns>
-		/// A list of sockets that have a specified socket as a source.
-		/// </returns>
-		public Socket[] HasSocketAsDestination(Socket socket)
-		{
-			return links
-				.Where(t => { return t.ToSocket == socket; })
-				.Select(t => { return t.FromSocket; })
-				.ToArray();
-		}
-
-		/// <summary>
-		/// Returns true if the specified socket is the destination for any
-		/// links.
-		/// </summary>
-		/// <param name="socket">The socket to check.</param>
-		/// <returns>True if the specified socket is linked to.</returns>
-		public bool IsSocketLinkedTo(Socket socket)
-		{
-			foreach (var link in links)
-			{
-				if (link.ToSocket == socket)
+				if (!fromToCache[from].Contains(to))
 				{
+					links.Add(link);
+					fromToCache[from].Add(to);
 					return true;
 				}
 			}
-
+			else
+			{
+				links.Add(link);
+				fromToCache[from] = new List<Socket>() { to };
+				return true;
+			}
 			return false;
 		}
 
@@ -142,6 +86,31 @@ namespace Exodrifter.NodeGraph
 			var from = a.IsInput(graph) ? b : a;
 			var to = a.IsInput(graph) ? a : b;
 
+			if (from == to)
+			{
+				return false;
+			}
+
+			// Update cache
+			InitCache();
+			if (fromToCache.ContainsKey(a))
+			{
+				fromToCache[a].Remove(b);
+				if (fromToCache[a].Count == 0)
+				{
+					fromToCache.Remove(a);
+				}
+			}
+			if (toFromCache.ContainsKey(b))
+			{
+				toFromCache[b].Remove(a);
+				if (toFromCache[b].Count == 0)
+				{
+					toFromCache.Remove(b);
+				}
+			}
+
+			// Update serialized data
 			return links.Remove(new Link(graph, from, to));
 		}
 
@@ -152,6 +121,18 @@ namespace Exodrifter.NodeGraph
 		/// <returns>The number of links removed.</returns>
 		public int RemoveAllWith(Socket socket)
 		{
+			// Update cache
+			InitCache();
+			if (fromToCache.ContainsKey(socket))
+			{
+				fromToCache.Remove(socket);
+			}
+			if (toFromCache.ContainsKey(socket))
+			{
+				toFromCache.Remove(socket);
+			}
+
+			// Update serialized data
 			return links.RemoveAll(
 				t => { return t.FromSocket == socket || t.ToSocket == socket; }
 			);
@@ -164,6 +145,34 @@ namespace Exodrifter.NodeGraph
 		/// <returns>The number of links removed.</returns>
 		public int RemoveAllWith(Node node)
 		{
+			// Update cache
+			InitCache();
+			var toRemove = new List<Socket>();
+			foreach (var socket in fromToCache.Keys)
+			{
+				if (socket.NodeID == node.ID)
+				{
+					toRemove.Add(socket);
+				}
+			}
+			foreach(var socket in toRemove)
+			{
+				fromToCache.Remove(socket);
+			}
+			toRemove = new List<Socket>();
+			foreach (var socket in toFromCache.Keys)
+			{
+				if (socket.NodeID == node.ID)
+				{
+					toRemove.Add(socket);
+				}
+			}
+			foreach (var socket in toRemove)
+			{
+				toFromCache.Remove(socket);
+			}
+
+			// Update serialized data
 			return links.RemoveAll(
 				t =>
 				{
@@ -172,6 +181,89 @@ namespace Exodrifter.NodeGraph
 				}
 			);
 		}
+
+		#endregion
+
+		#region Checks
+
+		/// <summary>
+		/// Returns true if the link specified by the two sockets exists.
+		/// </summary>
+		/// <param name="graph">The graph these sockets are in.</param>
+		/// <param name="a">The first socket in the link.</param>
+		/// <param name="b">The second socket in the link.</param>
+		/// <returns>True if that link specified by the two sockets exists.</returns>
+		public bool Contains(Graph graph, Socket a, Socket b)
+		{
+			InitCache();
+
+			var from = a.IsInput(graph) ? b : a;
+			var to = a.IsInput(graph) ? a : b;
+
+			if (!fromToCache.ContainsKey(from))
+			{
+				return false;
+			}
+
+			return fromToCache[from].Contains(to);
+		}
+
+		/// <summary>
+		/// Return a list of sockets that have the specified socket as a source.
+		/// </summary>
+		/// <param name="socket">The socket to use as the source.</param>
+		/// <returns>
+		/// A list of sockets that have a specified socket as a source.
+		/// </returns>
+		public Socket[] HasSocketAsSource(Socket socket)
+		{
+			InitCache();
+
+			if (!fromToCache.ContainsKey(socket))
+			{
+				return new Socket[0];
+			}
+			return fromToCache[socket].ToArray();
+		}
+
+		/// <summary>
+		/// Return a list of sockets that have the specified socket as a
+		/// destination.
+		/// </summary>
+		/// <param name="socket">The socket to use as the destination.</param>
+		/// <returns>
+		/// A list of sockets that have a specified socket as a source.
+		/// </returns>
+		public Socket[] HasSocketAsDestination(Socket socket)
+		{
+			InitCache();
+
+			if (!toFromCache.ContainsKey(socket))
+			{
+				return new Socket[0];
+			}
+			return toFromCache[socket].ToArray();
+		}
+
+		/// <summary>
+		/// Returns true if the specified socket is the destination for any
+		/// links.
+		/// </summary>
+		/// <param name="socket">The socket to check.</param>
+		/// <returns>True if the specified socket is linked to.</returns>
+		public bool IsSocketLinkedTo(Socket socket)
+		{
+			InitCache();
+
+			if (!toFromCache.ContainsKey(socket))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		#endregion
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
@@ -182,5 +274,49 @@ namespace Exodrifter.NodeGraph
 		{
 			return links.GetEnumerator();
 		}
+
+		#region Util
+
+		private Dictionary<Socket, List<Socket>> fromToCache;
+		private Dictionary<Socket, List<Socket>> toFromCache;
+		private void InitCache()
+		{
+			if (fromToCache == null)
+			{
+				fromToCache = new Dictionary<Socket, List<Socket>>();
+
+				foreach (var link in links)
+				{
+					if (fromToCache.ContainsKey(link.FromSocket))
+					{
+						fromToCache[link.FromSocket].Add(link.ToSocket);
+					}
+					else
+					{
+						fromToCache[link.FromSocket] =
+							new List<Socket>() { link.ToSocket };
+					}
+				}
+			}
+			if (toFromCache == null)
+			{
+				toFromCache = new Dictionary<Socket, List<Socket>>();
+
+				foreach (var link in links)
+				{
+					if (toFromCache.ContainsKey(link.ToSocket))
+					{
+						toFromCache[link.ToSocket].Add(link.FromSocket);
+					}
+					else
+					{
+						toFromCache[link.ToSocket] =
+							new List<Socket>() { link.FromSocket };
+					}
+				}
+			}
+		}
+
+		#endregion
 	}
 }
