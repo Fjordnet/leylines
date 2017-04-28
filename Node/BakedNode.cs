@@ -29,73 +29,28 @@ namespace Exodrifter.NodeGraph
 	{
 		#region Properties
 
-		public string ContextPath
-		{
-			get
-			{
-				if (string.IsNullOrEmpty(cachedContextPath))
-				{
-					CacheAttributeData();
-				}
-				return cachedContextPath;
-			}
-		}
-		private string cachedContextPath;
-
 		public override string DisplayName
 		{
 			get
 			{
-				if (string.IsNullOrEmpty(cachedDisplayName))
-				{
-					CacheAttributeData();
-				}
+				CacheNodeAttributeData();
 				return cachedDisplayName;
 			}
 			set { return; }
 		}
-		private string cachedDisplayName;
 
 		#endregion
 
-		private Socket[] cachedInputs;
 		public override Socket[] GetInputSockets()
 		{
-			if (cachedInputs != null)
-			{
-				return cachedInputs;
-			}
-
-			var ret = new List<Socket>();
-			var fields = GetFields<InputAttribute>();
-
-			foreach (var field in fields)
-			{
-				ret.Add(new Socket(ID, field.Name));
-			}
-
-			cachedInputs = ret.ToArray();
-			return cachedInputs;
+			CacheSocketAttributeData();
+			return inputsCache;
 		}
 
-		private Socket[] cachedOutputs;
 		public override Socket[] GetOutputSockets()
 		{
-			if (cachedOutputs != null)
-			{
-				return cachedOutputs;
-			}
-
-			var ret = new List<Socket>();
-			var fields = GetFields<OutputAttribute>();
-
-			foreach (var field in fields)
-			{
-				ret.Add(new Socket(ID, field.Name));
-			}
-
-			cachedOutputs = ret.ToArray();
-			return cachedOutputs;
+			CacheSocketAttributeData();
+			return outputsCache;
 		}
 
 		public override Socket GetSocket(string name)
@@ -103,48 +58,30 @@ namespace Exodrifter.NodeGraph
 			return new Socket(ID, name);
 		}
 
-		private Socket[] cachedSockets;
 		public override Socket[] GetSockets()
 		{
-			if (cachedSockets != null)
-			{
-				return cachedSockets;
-			}
-
-			var ret = new List<Socket>();
-			var fields = GetFields<SocketAttribute>();
-
-			foreach (var field in fields)
-			{
-				ret.Add(new Socket(ID, field.Name));
-			}
-
-			cachedSockets = ret.ToArray();
-			return cachedSockets;
+			CacheSocketAttributeData();
+			return socketsCache;
 		}
 
 		#region Socket Properties
 
 		public override string GetSocketDescription(string name)
 		{
-			var attr = GetFieldAttribute<DescriptionAttribute>(name);
-			if (attr != null)
-			{
-				return attr.text;
-			}
-			return null;
+			CacheDescriptionAttributeData();
+			return descriptionCache[name];
 		}
 
 		public override string GetSocketDisplayName(string name)
 		{
-			var attr = GetFieldAttribute<SocketAttribute>(name);
-			return attr.name;
+			CacheSocketAttributeData();
+			return socketAttrCache[name].name;
 		}
 
 		public override SocketFlags GetSocketFlags(string name)
 		{
-			var attr = GetFieldAttribute<SocketAttribute>(name);
-			return attr.flags;
+			CacheSocketAttributeData();
+			return socketAttrCache[name].flags;
 		}
 
 		public override Type GetSocketType(string name)
@@ -161,8 +98,8 @@ namespace Exodrifter.NodeGraph
 
 		public override bool IsSocketInput(string name)
 		{
-			var attr = GetFieldAttribute<SocketAttribute>(name);
-			return attr is InputAttribute;
+			CacheSocketAttributeData();
+			return socketIsInputCache[name];
 		}
 
 		public override void SetSocketValue(string name, object value)
@@ -201,9 +138,20 @@ namespace Exodrifter.NodeGraph
 			return null;
 		}
 
-		private FieldInfo[] GetFields<T>() where T : Attribute
+		private Dictionary<Type, FieldInfo[]> fieldsCache;
+		private Dictionary<Type, Attribute[]> attrCache;
+		private FieldInfo[] GetFields<T>(out T[] attributes) where T : Attribute
 		{
-			var ret = new List<FieldInfo>();
+			fieldsCache = fieldsCache ?? new Dictionary<Type, FieldInfo[]>();
+			attrCache = attrCache ?? new Dictionary<Type, Attribute[]>();
+			if (fieldsCache.ContainsKey(typeof(T)))
+			{
+				attributes = Array.ConvertAll(attrCache[typeof(T)], x => (T)x);
+				return fieldsCache[typeof(T)];
+			}
+
+			var retFields = new List<FieldInfo>();
+			var retAttrs = new List<T>();
 
 			var flags = BindingFlags.NonPublic | BindingFlags.Instance;
 			var fields = GetType().GetFields(flags);
@@ -215,48 +163,109 @@ namespace Exodrifter.NodeGraph
 				{
 					if (typeof(T).IsAssignableFrom(attr.GetType()))
 					{
-						ret.Add(field);
+						retAttrs.Add((T)attr);
+						retFields.Add(field);
 					}
 				}
 			}
 
-			return ret.ToArray();
+			attributes = retAttrs.ToArray();
+			fieldsCache[typeof(T)] = retFields.ToArray();
+			attrCache[typeof(T)] = attributes;
+			return fieldsCache[typeof(T)];
 		}
 
-		private T GetFieldAttribute<T>(string name) where T : Attribute
-		{
-			var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-			var matches = GetType().GetMember(name, flags);
+		#endregion
 
-			foreach (var match in matches)
+		#region Caching Methods
+
+		private string cachedDisplayName;
+		private void CacheNodeAttributeData()
+		{
+			if (cachedDisplayName != null)
 			{
-				var attrs = match.GetCustomAttributes(true);
-				foreach (var attr in attrs)
-				{
-					if (typeof(T).IsAssignableFrom(attr.GetType()))
-					{
-						return (T)attr;
-					}
-				}
+				return;
 			}
 
-			return null;
-		}
-
-		private void CacheAttributeData()
-		{
 			var type = GetType();
 			var attributes = (NodeAttribute[])
-				Attribute.GetCustomAttributes(type, typeof(NodeAttribute));
+			Attribute.GetCustomAttributes(type, typeof(NodeAttribute));
 			if (attributes.Length == 0)
 			{
 				cachedDisplayName = GetType().Name;
-				cachedContextPath = "Other/" + GetType().Name;
 			}
 			else
 			{
 				cachedDisplayName = attributes[0].Name;
-				cachedContextPath = attributes[0].Path;
+			}
+		}
+
+		private Socket[] socketsCache;
+		private Socket[] inputsCache;
+		private Socket[] outputsCache;
+		private Dictionary<string, bool> socketIsInputCache;
+		private Dictionary<string, FieldInfo> socketFieldCache;
+		private Dictionary<string, SocketAttribute> socketAttrCache;
+		private void CacheSocketAttributeData()
+		{
+			if (socketFieldCache != null && socketAttrCache != null
+				&& socketsCache != null && inputsCache != null
+				&& outputsCache != null)
+			{
+				return;
+			}
+
+			socketIsInputCache = new Dictionary<string, bool>();
+			socketFieldCache = new Dictionary<string, FieldInfo>();
+			socketAttrCache = new Dictionary<string, SocketAttribute>();
+
+			var sockets = new List<Socket>();
+			var inputs = new List<Socket>();
+			var outputs = new List<Socket>();
+
+			SocketAttribute[] attrs;
+			var fields = GetFields(out attrs);
+			for (int i = 0; i < fields.Length; ++i)
+			{
+				var name = fields[i].Name;
+				var isInput = attrs[i] is InputAttribute;
+
+				socketIsInputCache[name] = isInput;
+				socketFieldCache[name] = fields[i];
+				socketAttrCache[name] = attrs[i];
+
+				var socket = new Socket(ID, name);
+				sockets.Add(socket);
+				if (isInput)
+				{
+					inputs.Add(socket);
+				}
+				else
+				{
+					outputs.Add(socket);
+				}
+			}
+
+			socketsCache = sockets.ToArray();
+			inputsCache = inputs.ToArray();
+			outputsCache = outputs.ToArray();
+		}
+
+		Dictionary<string, string> descriptionCache;
+		private void CacheDescriptionAttributeData()
+		{
+			if (descriptionCache != null)
+			{
+				return;
+			}
+
+			descriptionCache = new Dictionary<string, string>();
+
+			DescriptionAttribute[] attrs;
+			var fields = GetFields(out attrs);
+			for (int i = 0; i < fields.Length; ++i)
+			{
+				descriptionCache[fields[i].Name] = attrs[i].text;
 			}
 		}
 
