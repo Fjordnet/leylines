@@ -301,7 +301,7 @@ namespace Exodrifter.NodeGraph
 			var node = ScriptableObject.CreateInstance<DynamicNode>();
 			node.DisplayName = type.Name;
 
-			node.AddOutputSocket(new DynamicSocket(type, type.Name, null,
+			node.AddOutputSocket(new DynamicSocket(type, type.Name,
 				SocketFlags.AllowMultipleLinks | SocketFlags.Editable));
 
 			return node;
@@ -320,22 +320,22 @@ namespace Exodrifter.NodeGraph
 					node.AddInputSocket(
 						new DynamicSocket(typeof(ExecType), "execIn"));
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, null, SocketFlags.Editable));
+						new DynamicSocket(type, type.Name, SocketFlags.Editable));
 
 					var @params = new List<string>();
 					foreach (var param in method.GetParameters())
 					{
 						node.AddInputSocket(
-							new DynamicSocket(param.ParameterType, param.Name, null, SocketFlags.Editable));
+							new DynamicSocket(param.ParameterType, param.Name, SocketFlags.Editable));
 						@params.Add(param.Name);
 					}
 
 					node.AddOutputSocket(
-						new DynamicSocket(typeof(ExecType), "execOut", null, SocketFlags.AllowMultipleLinks));
+						new DynamicSocket(typeof(ExecType), "execOut", SocketFlags.AllowMultipleLinks));
 					if (method.ReturnType != typeof(void))
 					{
 						node.AddOutputSocket(
-							new DynamicSocket(method.ReturnType, "result", null, SocketFlags.AllowMultipleLinks));
+							new DynamicSocket(method.ReturnType, "result", SocketFlags.AllowMultipleLinks));
 					}
 
 					node.AddExecInvoke(
@@ -350,12 +350,12 @@ namespace Exodrifter.NodeGraph
 					node.AddInputSocket(
 						new DynamicSocket(typeof(ExecType), "setExec"));
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, null, SocketFlags.Editable));
+						new DynamicSocket(type, type.Name, SocketFlags.Editable));
 
 					node.AddOutputSocket(
-						new DynamicSocket(typeof(ExecType), "execOut", null, SocketFlags.AllowMultipleLinks));
+						new DynamicSocket(typeof(ExecType), "execOut", SocketFlags.AllowMultipleLinks));
 					node.AddOutputSocket(
-						new DynamicSocket(field.FieldType, field.Name, null, SocketFlags.AllowMultipleLinks));
+						new DynamicSocket(field.FieldType, field.Name, SocketFlags.AllowMultipleLinks));
 
 					node.AddExecInvoke(
 						new ExecInvoke("setExec", "execOut", type.Name, "result", field.Name, InvokeType.SetField));
@@ -370,12 +370,12 @@ namespace Exodrifter.NodeGraph
 					node.AddInputSocket(
 						new DynamicSocket(typeof(ExecType), "setExec"));
 					node.AddInputSocket(
-						new DynamicSocket(type, type.Name, null, SocketFlags.Editable));
+						new DynamicSocket(type, type.Name, SocketFlags.Editable));
 
 					node.AddOutputSocket(
-						new DynamicSocket(typeof(ExecType), "execOut", null, SocketFlags.AllowMultipleLinks));
+						new DynamicSocket(typeof(ExecType), "execOut", SocketFlags.AllowMultipleLinks));
 					node.AddOutputSocket(
-						new DynamicSocket(property.PropertyType, property.Name, null, SocketFlags.AllowMultipleLinks));
+						new DynamicSocket(property.PropertyType, property.Name, SocketFlags.AllowMultipleLinks));
 
 					node.AddExecInvoke(
 						new ExecInvoke("setExec", "execOut", type.Name, "result", property.Name, InvokeType.SetProperty));

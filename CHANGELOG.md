@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Dynamic reflection no longer includes special methods, items marked with the
   CompilerGeneratedAttribute, and any types that start with "<>", which are
   commonly anonymous types
+* The width of nodes is now determined by the node instead of the sockets
 
 ### Fixed
 * Fix dynamic node creation not working for overloaded methods

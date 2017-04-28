@@ -30,19 +30,11 @@ namespace Exodrifter.NodeGraph
 		(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
 	public class OutputAttribute : SocketAttribute
 	{
-		public OutputAttribute(string name, int width)
-			: base(name, width, SocketFlags.AllowMultipleLinks)
-		{
-		}
+		const SocketFlags DEFAULT_FLAGS = SocketFlags.AllowMultipleLinks;
 
-		public OutputAttribute(string name, SocketFlags flags)
-			: base(name, DEFAULT_WIDTH, flags)
-		{
-		}
-
-		public OutputAttribute(string name = null, int width = DEFAULT_WIDTH,
-			SocketFlags flags = SocketFlags.AllowMultipleLinks)
-			: base(name, width, flags)
+		public OutputAttribute
+			(string name = null, SocketFlags flags = DEFAULT_FLAGS)
+			: base(name, flags)
 		{
 		}
 	}

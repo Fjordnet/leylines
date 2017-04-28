@@ -30,6 +30,10 @@ namespace Exodrifter.NodeGraph
 	public class DynamicNode : Node
 	{
 		[SerializeField]
+		private float inputWidth = INPUT_WIDTH;
+		[SerializeField]
+		private float outputWidth = OUTPUT_WIDTH;
+		[SerializeField]
 		private List<ExecInvoke> execInvokes;
 		[SerializeField]
 		private List<EvalInvoke> evalInvokes;
@@ -45,6 +49,9 @@ namespace Exodrifter.NodeGraph
 			get { return name; }
 			set { name = value; }
 		}
+
+		public override float InputWidth { get { return inputWidth; } }
+		public override float OutputWidth { get { return outputWidth; } }
 
 		#endregion
 
@@ -261,12 +268,6 @@ namespace Exodrifter.NodeGraph
 		{
 			var socket = GetDynamicSocket(name);
 			return socket.SocketValue;
-		}
-
-		public override int GetSocketWidth(string name)
-		{
-			var socket = GetDynamicSocket(name);
-			return socket.Width;
 		}
 
 		public override bool IsSocketInput(string name)

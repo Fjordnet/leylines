@@ -7,16 +7,18 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	public class WhileNode : BakedNode
 	{
 		[Description("The input signal.")]
-		[SerializeField, Input("Exec", (SocketFlags)0)]
+		[SerializeField, Input("Exec", 0)]
 		internal ExecType execIn = ExecType.None;
 
 		[Description("True if the signal should continue.")]
-		[SerializeField, Input("Condition", 20, SocketFlags.Editable)]
+		[SerializeField, Input("Condition", SocketFlags.Editable)]
 		internal bool condition = false;
 
 		[Description("The output signal, if the condition was true.")]
 		[SerializeField, Output("True")]
 		internal ExecType execTrue = ExecType.None;
+
+		public override float InputWidth { get { return 30; } }
 
 		#region Methods
 

@@ -30,17 +30,12 @@ namespace Exodrifter.NodeGraph
 		(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
 	public class SocketAttribute : Attribute
 	{
-		public const int DEFAULT_WIDTH = 120;
-
 		public readonly string name;
-		public readonly int width;
 		public readonly SocketFlags flags;
 
-		public SocketAttribute(string name = null, int width = DEFAULT_WIDTH,
-			SocketFlags flags = 0)
+		public SocketAttribute(string name = null, SocketFlags flags = 0)
 		{
 			this.name = name;
-			this.width = width;
 			this.flags = flags;
 		}
 	}

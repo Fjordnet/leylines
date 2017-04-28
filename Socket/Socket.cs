@@ -133,16 +133,6 @@ namespace Exodrifter.NodeGraph
 		}
 
 		/// <summary>
-		/// Returns the width of this socket.
-		/// </summary>
-		/// <param name="graph">The graph this socket is in.</param>
-		/// <returns>The width of this socket.</returns>
-		public object GetWidth(Graph graph)
-		{
-			return GetNode(graph).GetSocketWidth(this);
-		}
-
-		/// <summary>
 		/// Returns true if this socket is an input.
 		/// </summary>
 		/// <param name="graph">The graph this socket is in.</param>

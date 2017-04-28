@@ -138,12 +138,6 @@ namespace Exodrifter.NodeGraph
 			return field.GetValue(this);
 		}
 
-		public override int GetSocketWidth(string name)
-		{
-			var attr = GetFieldAttribute<SocketAttribute>(name);
-			return attr.width;
-		}
-
 		public override bool IsSocketInput(string name)
 		{
 			var attr = GetFieldAttribute<SocketAttribute>(name);

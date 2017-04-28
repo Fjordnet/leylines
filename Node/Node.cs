@@ -39,6 +39,16 @@ namespace Exodrifter.NodeGraph
 		[SerializeField]
 		private int yPos;
 
+		/// <summary>
+		/// The default input width.
+		/// </summary>
+		protected const float INPUT_WIDTH = 120;
+
+		/// <summary>
+		/// The default output width.
+		/// </summary>
+		protected const float OUTPUT_WIDTH = 120;
+
 		#region Properties
 
 		/// <summary>
@@ -85,6 +95,16 @@ namespace Exodrifter.NodeGraph
 		/// The display name of this node.
 		/// </summary>
 		public abstract string DisplayName { get; set; }
+
+		/// <summary>
+		/// The width of the input sockets.
+		/// </summary>
+		public virtual float InputWidth { get { return INPUT_WIDTH; } }
+
+		/// <summary>
+		/// The width of the output sockets.
+		/// </summary>
+		public virtual float OutputWidth { get { return OUTPUT_WIDTH; } }
 
 		#endregion
 
@@ -253,29 +273,6 @@ namespace Exodrifter.NodeGraph
 					("Specified socket has the wrong node ID!");
 			}
 			return GetSocketValue(socket.FieldName);
-		}
-
-		/// <summary>
-		/// Returns the width of a socket in the UI.
-		/// </summary>
-		/// <param name="name">
-		/// The name of the socket to get the width of.
-		/// </param>
-		/// <returns>The width of the socket.</returns>
-		public abstract int GetSocketWidth(string name);
-
-		/// <summary>
-		/// Returns the width of a socket in the UI.
-		/// </summary>
-		/// <param name="socket">The socket to get the width of.</param>
-		/// <returns>The width of the socket.</returns>
-		public int GetSocketWidth(Socket socket)
-		{
-			if (socket.NodeID != id) {
-				throw new ArgumentException
-					("Specified socket has the wrong node ID!");
-			}
-			return GetSocketWidth(socket.FieldName);
 		}
 
 		/// <summary>

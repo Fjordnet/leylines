@@ -7,11 +7,11 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	public class IfNode : BakedNode
 	{
 		[Description("The execution signal that performs the test.")]
-		[SerializeField, Input("Exec", (SocketFlags)0)]
+		[SerializeField, Input("Exec", 0)]
 		internal ExecType execIn = ExecType.None;
 
 		[Description("True if the signal should continue.")]
-		[SerializeField, Input("Condition", 20, SocketFlags.Editable)]
+		[SerializeField, Input("Condition", SocketFlags.Editable)]
 		internal bool condition = false;
 
 		[Description("The execution signal, if the condition was true.")]
@@ -21,6 +21,8 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("The execution signal, if the condition was false.")]
 		[SerializeField, Output("False")]
 		internal ExecType execFalse = ExecType.None;
+
+		public override float InputWidth { get { return 30; } }
 
 		#region Methods
 

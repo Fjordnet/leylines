@@ -7,16 +7,18 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 	public class WaitForSecondsNode : BakedNode
 	{
 		[Description("The input signal.")]
-		[SerializeField, Input("Exec", (SocketFlags)0)]
+		[SerializeField, Input("Exec", 0)]
 		internal ExecType execIn = ExecType.None;
 
 		[Description("The number of seconds to wait for.")]
-		[SerializeField, Input("Seconds", 50)]
+		[SerializeField, Input("Seconds")]
 		internal float seconds = 1;
 
 		[Description("The output signal.")]
 		[SerializeField, Output("Exec")]
 		internal ExecType execOut = ExecType.None;
+
+		public override float InputWidth { get { return 60; } }
 
 		#region Methods
 

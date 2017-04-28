@@ -37,8 +37,6 @@ namespace Exodrifter.NodeGraph
 		[SerializeField]
 		private SocketFlags flags;
 		[SerializeField]
-		private int width = SocketAttribute.DEFAULT_WIDTH;
-		[SerializeField]
 		private DynamicValue value;
 
 		#region Properties
@@ -80,15 +78,6 @@ namespace Exodrifter.NodeGraph
 		}
 
 		/// <summary>
-		/// The width of this socket in the node graph UI.
-		/// </summary>
-		public int Width
-		{
-			get { return width; }
-			set { width = value; }
-		}
-
-		/// <summary>
 		/// The value of this socket.
 		/// </summary>
 		public object SocketValue
@@ -105,21 +94,12 @@ namespace Exodrifter.NodeGraph
 		/// <param name="type">The type of the socket.</param>
 		/// <param name="name">The name of the socket.</param>
 		/// <param name="flags">The socket flags.</param>
-		/// <param name="allowMultipleLinks">
-		/// True if this socket allows multiple links.
-		/// </param>
-		/// <param name="width">
-		/// The width of this socket in the node graph UI.
-		/// </param>
-		public DynamicSocket(Type type, string name, string description = null,
-			SocketFlags flags = 0, int width = SocketAttribute.DEFAULT_WIDTH)
+		public DynamicSocket(Type type, string name, SocketFlags flags = 0)
 		{
 			value = new DynamicValue();
 			SocketType = type;
 			SocketName = name;
-			Description = description;
 			Flags = flags;
-			Width = width;
 		}
 	}
 }

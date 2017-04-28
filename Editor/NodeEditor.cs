@@ -49,9 +49,9 @@ namespace Exodrifter
 			var inputs = node.GetInputSockets();
 			var outputs = node.GetOutputSockets();
 
-			var inputWidth = GetContentWidth(node, inputs);
+			var inputWidth = GetContentWidth(node, true, inputs);
 			var inputHeight = GetPropertyHeights(serializedObject, node, inputs, editor);
-			var outputWidth = GetContentWidth(node, outputs);
+			var outputWidth = GetContentWidth(node, false, outputs);
 			var outputHeight = GetPropertyHeights(serializedObject, node, outputs, editor);
 			var height = Mathf.Max(inputHeight, outputHeight)
 				+ LINE_PADDING + EditorGUIUtility.singleLineHeight;
@@ -291,7 +291,7 @@ namespace Exodrifter
 		}
 
 		private static float GetContentWidth
-			(Node node, IEnumerable<Socket> sockets)
+			(Node node, bool isInput, IEnumerable<Socket> sockets)
 		{
 			float? max = null;
 			foreach (var socket in sockets)
@@ -308,7 +308,7 @@ namespace Exodrifter
 				}
 				else if (node.GetSocketFlags(socket).IsEditable())
 				{
-					float width = node.GetSocketWidth(socket);
+					float width = isInput ? node.InputWidth : node.OutputWidth;
 					max = max ?? width;
 					max = Mathf.Max(max.Value, width);
 				}
