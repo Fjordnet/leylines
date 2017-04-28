@@ -203,11 +203,46 @@ namespace Exodrifter
 			bool editable = node.GetSocketFlags(socket).IsEditable();
 			bool linked = editor.Graph.Links.IsSocketLinkedTo(socket);
 
+			rect.height = EditorGUIUtility.singleLineHeight;
+
+			var clipboardHasValue = false;
+			var hovering = rect.Contains(Event.current.mousePosition);
 			if (editable && !linked)
 			{
-				rect.height = EditorGUIUtility.singleLineHeight;
 				var type = node.GetSocketType(socket);
 				var value = node.GetSocketValue(socket);
+				clipboardHasValue = editor.Clipboard.ContainsKey(type);
+
+				// Check for clipboard operations
+				if (hovering)
+				{
+					switch (Event.current.type)
+					{
+						case EventType.MouseDown:
+							if (Event.current.shift)
+							{
+								if (Event.current.button == 0)
+								{
+									if (clipboardHasValue)
+									{
+										value = editor.Clipboard[type];
+										node.SetSocketValue(socket, value);
+									}
+								}
+								else if (Event.current.button == 1)
+								{
+									editor.Clipboard[type] = value;
+								}
+
+								Event.current.Use();
+							}
+							break;
+
+						case EventType.MouseUp:
+							Event.current.Use();
+							break;
+					}
+				}
 
 				var prop = serializedObject.FindProperty(socket.FieldName);
 				if (prop != null)
@@ -229,20 +264,21 @@ namespace Exodrifter
 			}
 			else
 			{
-				rect.height = EditorGUIUtility.singleLineHeight;
 				EditorGUI.LabelField(rect, name);
 			}
 
 			// Prepare a tooltip
-			if (rect.Contains(Event.current.mousePosition) && editor.Target == null)
+			if (hovering && editor.Target == null)
 			{
 				var text = string.Format(
-					"<color=#4aa><i>{0}</i></color> <b>{1}</b>\n{2}",
+					"<color=#4aa><i>{0}</i></color> <b>{1}</b>\n{2}{3}{4}",
 					node.GetSocketType(socket).Name,
 					node.GetSocketDisplayName(socket),
 					string.IsNullOrEmpty(node.GetSocketDescription(socket))
-						? "<color=#777><i>No documentation</i></color>"
-						: node.GetSocketDescription(socket)
+						? "<color=#aaa><i>No documentation</i></color>"
+						: node.GetSocketDescription(socket),
+					(editable && !linked ? "\n<color=#777><i>Shift + Right click to copy</i></color>" : ""),
+					(clipboardHasValue ? "\n<color=#777><i>Shift + Left click to paste</i></color>" : "")
 				);
 				editor.Target = new Tooltip(text);
 			}

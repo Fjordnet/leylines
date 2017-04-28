@@ -68,6 +68,16 @@ namespace Exodrifter.NodeGraph
 			}
 		}
 
+		private Dictionary<Type, object> clipboard;
+		public Dictionary<Type, object> Clipboard
+		{
+			get
+			{
+				clipboard = clipboard ?? new Dictionary<Type, object>();
+				return clipboard;
+			}
+		}
+
 		private object target;
 		public object Target
 		{

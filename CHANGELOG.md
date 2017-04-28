@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Search box now has a scrollbar and can be scrolled by keyboard and mouse
 * Search results are cached when the search string is made longer, which
   will reduce query time
+* Factorio-style copy paste for member fields on a node
 
 ### Changed
 * Fuzzy search is now exhaustive, so it can return better results
