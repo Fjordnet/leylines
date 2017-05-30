@@ -188,7 +188,6 @@ namespace Exodrifter.NodeGraph
 			rectCache = rectCache ?? new Dictionary<Socket, Rect>();
 			rectCache.Clear();
 
-			antiAlias = 2;
 			autoRepaintOnSceneChange = true;
 			wantsMouseMove = true;
 
