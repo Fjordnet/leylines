@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -36,24 +35,34 @@ namespace Exodrifter.NodeGraph
 	public class NodeGraphPolicy
 	{
 		[SerializeField]
-		private bool useCustom;
+		private bool useCustom = false;
 		[SerializeField]
-		private List<string> customFilters;
+		private List<string> customFilters = new List<string>();
 
 		[SerializeField]
-		private bool useReflection;
+		private bool useReflection = false;
 		[SerializeField]
-		private List<string> assemblyFilters;
+		private List<string> assemblyFilters = new List<string>();
 
-		public List<SearchResult> SearchItems
+		public SyncList<SearchResult> SearchItems
 		{
 			get
 			{
-				Init();
-				return searchItems;
+				lock (this)
+				{
+					Init();
+					return searchItems;
+				}
 			}
 		}
-		private List<SearchResult> searchItems;
+		private SyncList<SearchResult> searchItems;
+
+		private Job job;
+
+		private bool oldUseCustom;
+		private List<string> oldCustomFilters;
+		private bool oldUseReflection;
+		private List<string> oldAssemblyFilters;
 
 		#region Properties
 
@@ -95,48 +104,62 @@ namespace Exodrifter.NodeGraph
 
 		#endregion
 
-		public NodeGraphPolicy()
+		private void Init()
 		{
-			assemblyFilters = new List<string>();
-			customFilters = new List<string>();
-		}
-
-		public void Init(bool force = false)
-		{
-			if (searchItems == null)
+			// Check if cache is still valid
+			if (job != null)
 			{
-				searchItems = new List<SearchResult>();
-			}
-
-			if (force)
-			{
-				searchItems.Clear();
-			}
-
-			if (searchItems.Count == 0)
-			{
-				var reflectionItems = InitReflectionData();
-				foreach (var item in reflectionItems)
+				var same = true;
+				if (oldUseCustom != useCustom)
 				{
-					searchItems.Add(new SearchResult(item.Key, item.Value));
+					same = false;
+				}
+				else if (!oldCustomFilters.SequenceEqual(customFilters))
+				{
+					same = false;
+				}
+				else if (oldUseReflection != useReflection)
+				{
+					same = false;
+				}
+				else if (!oldAssemblyFilters.SequenceEqual(assemblyFilters))
+				{
+					same = false;
 				}
 
-				var customItems = InitCustomData();
-				foreach (var item in customItems)
+				if (same)
 				{
-					searchItems.Add(new SearchResult(item.Key, item.Value));
+					return;
 				}
 			}
+
+			// Update cache
+			oldUseCustom = useCustom;
+			oldCustomFilters = new List<string>(customFilters);
+			oldUseReflection = useReflection;
+			oldAssemblyFilters = new List<string>(assemblyFilters);
+
+			if (job != null)
+			{
+				job.Abort();
+			}
+
+			var results = new SyncList<SearchResult>();
+			searchItems = results;
+			job = new Job(() =>
+			{
+				InitReflectionData(results);
+				InitCustomData(results);
+			}).Start();
 		}
 
 		#region Custom
 
-		private Dictionary<string, Func<Node>> InitCustomData()
+		private void InitCustomData(SyncList<SearchResult> results)
 		{
-			var ret = new Dictionary<string, Func<Node>>();
 			if (!useCustom)
 			{
-				return ret;
+				return;
 			}
 
 			var types = GetClassesOfType<Node>();
@@ -166,12 +189,12 @@ namespace Exodrifter.NodeGraph
 					path = type.FullName.Replace('.', '/').Replace('+', '/');
 				}
 
-				ret[path] = () => {
-					return (Node)ScriptableObject.CreateInstance(type);
-				};
+				results.Add(new SearchResult(path, () =>
+					{
+						return (Node)ScriptableObject.CreateInstance(type);
+					})
+				);
 			}
-
-			return ret;
 		}
 
 		private static IEnumerable<Type> GetClassesOfType<T>() where T : class
@@ -200,12 +223,11 @@ namespace Exodrifter.NodeGraph
 
 		#region Reflection
 
-		private Dictionary<string, Func<Node>> InitReflectionData()
+		private void InitReflectionData(SyncList<SearchResult> results)
 		{
-			var ret = new Dictionary<string, Func<Node>>();
 			if (!useReflection)
 			{
-				return ret;
+				return;
 			}
 
 			var types = (
@@ -213,7 +235,6 @@ namespace Exodrifter.NodeGraph
 				from type in assembly.GetTypes()
 				where AssemblyIsAllowed(assembly)
 				where !type.Name.StartsWith("<>") // Anonymous types
-				where !type.GetCustomAttributes(true).Any(t => t.GetType() == typeof(CompilerGeneratedAttribute))
 				where !typeof(Node).IsAssignableFrom(type) // Custom nodes
 				select type
 			).ToList();
@@ -231,7 +252,11 @@ namespace Exodrifter.NodeGraph
 				// Allow variable node if type is not a static class
 				if (!type.IsAbstract || !type.IsSealed)
 				{
-					ret[typePath] = () => { return CreateDynamicNode(type); };
+					results.Add(new SearchResult(typePath, () =>
+						{
+							return CreateDynamicNode(type);
+						})
+					);
 				}
 
 				var members =
@@ -286,14 +311,13 @@ namespace Exodrifter.NodeGraph
 					var memberPath = string.Format("{0}.{1}{2}",
 						typePath, member.Name, suffix);
 
-					ret[memberPath] = () =>
-					{
-						return CreateDynamicNode(type, member);
-					};
+					results.Add(new SearchResult(memberPath, () =>
+						{
+							return CreateDynamicNode(type, member);
+						})
+					);
 				}
 			}
-
-			return ret;
 		}
 
 		private Node CreateDynamicNode(Type type)

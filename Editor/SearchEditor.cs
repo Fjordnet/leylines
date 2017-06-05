@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 namespace Exodrifter.NodeGraph
 {
-	[SerializeField]
+	[Serializable]
 	public class SearchEditor
 	{
 		[SerializeField]
@@ -24,10 +27,11 @@ namespace Exodrifter.NodeGraph
 		[SerializeField]
 		private float scrollPos;
 
-		[SerializeField]
-		private List<SearchResult> results = new List<SearchResult>();
+		private SyncList<SearchResult> results;
+		private Job searchJob;
 
 		private Texture2D highlight;
+		private int resultCount;
 
 		#region Properties
 
@@ -143,42 +147,83 @@ namespace Exodrifter.NodeGraph
 			var newSearchStr = GUILayout.TextField(searchStr);
 			GUI.FocusControl("search_field");
 
-			bool doSearch = false;
-			if (results == null || string.IsNullOrEmpty(newSearchStr))
+			if (searchStr != newSearchStr)
 			{
-				results = policy.SearchItems;
-				doSearch = true;
-			}
-
-			if (doSearch || searchStr != newSearchStr)
-			{
-				// Restart the search if the new string is shorter
-				if (newSearchStr.Length < searchStr.Length)
+				if (searchJob != null)
 				{
-					results = policy.SearchItems;
+					searchJob.IsRunning = false;
 				}
 
-				// Restart the search if the new string is a different sequence
-				else if (newSearchStr.Substring(0, searchStr.Length) != searchStr)
+				var newResults = new SyncList<SearchResult>();
+				results = newResults;
+				searchJob = new Job((job) =>
 				{
-					results = policy.SearchItems;
-				}
+					var scores = new List<int>();
 
-				results = (
-					from result in results
-					select new
+					int timeout = 0;
+					int n = 0;
+					while (job.IsRunning)
 					{
-						S = FuzzySearch(newSearchStr, result.Label),
-						R = result
-					})
-					.Where(x => x.S != int.MinValue)
-					.OrderByDescending(x => x.S)
-					.Select(x => x.R)
-					.ToList();
+						// Check if the search items have changed (and restart
+						// the search if so)
+						if (n > policy.SearchItems.Count)
+						{
+							scores.Clear();
+							newResults.Clear();
+							n = 0;
+						}
+
+						// Get the next item, if available
+						if (n == policy.SearchItems.Count)
+						{
+							if (timeout > 0)
+							{
+								break;
+							}
+
+							timeout++;
+							Thread.Sleep(1000);
+							continue;
+						}
+
+						timeout = 0;
+						var item = policy.SearchItems[n++];
+
+						// Score the item and insert it
+						var score = FuzzySearch(newSearchStr, item.Label);
+						if (score == int.MinValue)
+						{
+							continue;
+						}
+
+						int i = 0;
+						for (; i < scores.Count; ++i)
+						{
+							if (score > scores[i])
+							{
+								scores.Insert(i, score);
+								newResults.Insert(i, item);
+								break;
+							}
+						}
+
+						if (i == scores.Count)
+						{
+							scores.Add(score);
+							newResults.Add(item);
+						}
+					}
+				}).Start();
 			}
 			searchStr = newSearchStr;
 
-			selected = Mathf.Clamp(selected, 0, results.Count - 1);
+			// Update the count
+			if (Event.current.type != EventType.Repaint)
+			{
+				resultCount = results == null ? 0 : results.Count;
+			}
+
+			selected = Mathf.Clamp(selected, 0, resultCount - 1);
 			if (keysUsed)
 			{
 				if (selected > Mathf.FloorToInt(scrollPos) + 11)
@@ -190,11 +235,16 @@ namespace Exodrifter.NodeGraph
 					scrollPos = selected;
 				}
 			}
-			scrollPos = Mathf.Clamp(scrollPos, 0, Mathf.Max(0, results.Count - 12));
+			scrollPos = Mathf.Clamp(scrollPos, 0, Mathf.Max(0, resultCount - 12));
 
-			GUILayout.Label("" + results.Count, GUILayout.ExpandWidth(false));
+			var countStr = "" + resultCount;
+			if (searchJob != null && searchJob.IsRunning)
+			{
+				countStr += "...";
+			}
+			GUILayout.Label(countStr, GUILayout.ExpandWidth(false));
 			GUILayout.EndHorizontal();
-			
+
 			var oldRichText = GUI.skin.label.richText;
 			GUI.skin.label.richText = true;
 
@@ -202,9 +252,9 @@ namespace Exodrifter.NodeGraph
 			var scrollSize = GUI.skin.verticalScrollbar.fixedWidth;
 			GUILayout.BeginVertical();
 			// Show results
-			int index = Mathf.Clamp((int)scrollPos, 0, results.Count);
+			int index = Mathf.Clamp((int)scrollPos, 0, resultCount);
 			bool hoveringOnResult = false;
-			for (int i = index; i < Mathf.Min(index + 12, results.Count); ++i)
+			for (int i = index; i < Mathf.Min(index + 12, resultCount); ++i)
 			{
 				var result = results[i];
 
@@ -245,7 +295,7 @@ namespace Exodrifter.NodeGraph
 				GUI.skin.label.alignment = oldAlignment;
 			}
 			// No results
-			if (results.Count == 0) {
+			if (resultCount == 0) {
 				var oldAlignment = GUI.skin.label.alignment;
 				GUI.skin.label.alignment = TextAnchor.LowerCenter;
 				GUI.enabled = false;
@@ -255,8 +305,8 @@ namespace Exodrifter.NodeGraph
 			}
 			GUILayout.EndVertical();
 			scrollPos = GUILayout.VerticalScrollbar
-				(scrollPos, Mathf.Max(results.Count, 12),
-				0, Mathf.Max(results.Count, 12), GUILayout.ExpandHeight(true));
+				(scrollPos, Mathf.Max(resultCount, 12),
+				0, Mathf.Max(resultCount, 12), GUILayout.ExpandHeight(true));
 			GUILayout.EndHorizontal();
 
 			GUI.skin.label.richText = oldRichText;

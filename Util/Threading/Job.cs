@@ -31,6 +31,20 @@ namespace Exodrifter.NodeGraph
 		}
 
 		/// <summary>
+		/// Creates a new job that executes the specified action.
+		/// </summary>
+		/// <param name="action">The action to execute.</param>
+		public Job(Action<Job> action)
+		{
+			thread = new Thread(new ThreadStart(() =>
+			{
+				IsRunning = true;
+				action(this);
+				IsRunning = false;
+			}));
+		}
+
+		/// <summary>
 		/// Starts the job.
 		/// </summary>
 		/// <returns>This job, for chaining.</returns>
