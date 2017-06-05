@@ -83,7 +83,8 @@ namespace Exodrifter.NodeGraph
 				Close();
 				return;
 			}
-			if (!isOpen) {
+			if (!isOpen)
+			{
 				return;
 			}
 
@@ -297,7 +298,8 @@ namespace Exodrifter.NodeGraph
 				GUI.skin.label.alignment = oldAlignment;
 			}
 			// No results
-			if (resultCount == 0) {
+			if (resultCount == 0)
+			{
 				var oldAlignment = GUI.skin.label.alignment;
 				GUI.skin.label.alignment = TextAnchor.LowerCenter;
 				GUI.enabled = false;
@@ -347,7 +349,7 @@ namespace Exodrifter.NodeGraph
 
 				// Detect key events in the search field
 				case EventType.Used:
-					switch(Event.current.keyCode)
+					switch (Event.current.keyCode)
 					{
 						case KeyCode.KeypadEnter:
 						case KeyCode.Return:
@@ -366,17 +368,18 @@ namespace Exodrifter.NodeGraph
 
 		private Texture2D GetHighlightTex()
 		{
-			if (!Util.IsNull(highlight)) {
+			if (!Util.IsNull(highlight))
+			{
 				return highlight;
 			}
 
 			Color[] pixels = new Color[1];
 			pixels[0] = new Color32(61, 128, 223, 255);
- 
+
 			highlight = new Texture2D(1, 1);
 			highlight.SetPixels(pixels);
 			highlight.Apply();
- 
+
 			return highlight;
 		}
 
@@ -409,6 +412,7 @@ namespace Exodrifter.NodeGraph
 		private int FuzzySearch(string pattern, string str,
 			int patternStart = 0, int stringStart = 0)
 		{
+			bool start = true;
 			bool prev = false;
 			int bestScore = int.MinValue, score = 0;
 			int pi = patternStart, si = stringStart;
@@ -419,18 +423,29 @@ namespace Exodrifter.NodeGraph
 				{
 					// Exhaustive search
 					var skipScore = FuzzySearch(pattern, str, pi, si + 1);
-					bestScore = Mathf.Max(bestScore, skipScore);
+					if (skipScore != int.MinValue)
+					{
+						bestScore = Mathf.Max(bestScore, score + skipScore);
+					}
 
+					// Starting letter
+					if (start)
+					{
+						score += 15;
+					}
+					// Consecutive letters
+					else if (prev)
+					{
+						score += 15;
+					}
 					// Uppercase letters
-					if (char.IsUpper(str[si])) {
+					else if (!prev && char.IsUpper(str[si]))
+					{
 						score += 10;
 					}
 					// Seperator bonus
-					else if ('.' == pattern[pi] || '/' == pattern[pi]) {
-						score += 10;
-					}
-					// Consecutive letters
-					else if (prev) {
+					else if ('.' == pattern[pi] || '/' == pattern[pi])
+					{
 						score += 10;
 					}
 
@@ -442,9 +457,10 @@ namespace Exodrifter.NodeGraph
 				{
 					// Unmatched letter
 					score -= 2;
-
 					prev = false;
 				}
+
+				start = (str[si] == '.' || str[si] == '/');
 				si++;
 			}
 
