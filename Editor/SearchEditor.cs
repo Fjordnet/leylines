@@ -199,7 +199,9 @@ namespace Exodrifter.NodeGraph
 						int i = 0;
 						for (; i < scores.Count; ++i)
 						{
-							if (score > scores[i])
+							if (score > scores[i] ||
+								(score == scores[i] && item.Label.Length < newResults[i].Label.Length)
+								)
 							{
 								scores.Insert(i, score);
 								newResults.Insert(i, item);
@@ -421,15 +423,15 @@ namespace Exodrifter.NodeGraph
 
 					// Uppercase letters
 					if (char.IsUpper(str[si])) {
-						score += 20;
+						score += 10;
 					}
 					// Seperator bonus
-					if ('.' == pattern[pi] || '/' == pattern[pi]) {
-						score += 20;
+					else if ('.' == pattern[pi] || '/' == pattern[pi]) {
+						score += 10;
 					}
 					// Consecutive letters
-					if (prev) {
-						score += 5;
+					else if (prev) {
+						score += 10;
 					}
 
 					prev = true;
@@ -439,7 +441,7 @@ namespace Exodrifter.NodeGraph
 				else
 				{
 					// Unmatched letter
-					score -= 1;
+					score -= 2;
 
 					prev = false;
 				}
@@ -453,7 +455,7 @@ namespace Exodrifter.NodeGraph
 			}
 
 			// Score remaining unmatched letters
-			score -= (str.Length - si) * 1;
+			score -= (str.Length - si) * 2;
 
 			return Mathf.Max(score, bestScore);
 		}
