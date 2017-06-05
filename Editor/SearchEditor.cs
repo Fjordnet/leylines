@@ -305,7 +305,7 @@ namespace Exodrifter.NodeGraph
 			}
 			GUILayout.EndVertical();
 			scrollPos = GUILayout.VerticalScrollbar
-				(scrollPos, Mathf.Max(resultCount, 12),
+				(scrollPos, Mathf.Min(resultCount, 12),
 				0, Mathf.Max(resultCount, 12), GUILayout.ExpandHeight(true));
 			GUILayout.EndHorizontal();
 
