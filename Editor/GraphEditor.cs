@@ -421,22 +421,18 @@ namespace Exodrifter.NodeGraph
 						GUI.FocusControl("search_field");
 						Event.current.Use();
 					}
-					break;
-
-				case EventType.ContextClick:
-					if (Graph == null)
+					if (Event.current.button == 1 && Graph != null)
 					{
-						break;
-					}
-					if (graphRect.Contains(Event.current.mousePosition))
-					{
-						var clipPos = Event.current.mousePosition;
-						clipPos.y -= topToolbarRect.size.y + GRAPH_PADDING;
-						search.UnsetContext();
-						search.Open(clipPos, GraphPosition, Graph.Policy);
-						Target = search;
-						GUI.FocusControl("search_field");
-						Event.current.Use();
+						if (graphRect.Contains(Event.current.mousePosition))
+						{
+							var clipPos = Event.current.mousePosition;
+							clipPos.y -= topToolbarRect.size.y + GRAPH_PADDING;
+							search.UnsetContext();
+							search.Open(clipPos, GraphPosition, Graph.Policy);
+							Target = search;
+							GUI.FocusControl("search_field");
+							Event.current.Use();
+						}
 					}
 					break;
 
