@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System;
+using System.Collections.Generic;
 
 namespace Exodrifter.NodeGraph
 {
@@ -39,10 +40,47 @@ namespace Exodrifter.NodeGraph
 		/// </summary>
 		public Func<Node> MakeNode { get; set; }
 
-		public SearchResult(string label, Func<Node> makeNode)
+		/// <summary>
+		/// The inputs on the node this search result will make.
+		/// </summary>
+		public List<Type> Inputs;
+
+		/// <summary>
+		/// The outputs on the node this search result will make.
+		/// </summary>
+		public List<Type> Outputs;
+
+		public SearchResult(string label, Func<Node> makeNode,
+			List<Type> inputs = null, List<Type> outputs = null)
 		{
 			Label = label;
 			MakeNode = makeNode;
+			Inputs = inputs ?? new List<Type>();
+			Outputs = outputs ?? new List<Type>();
+		}
+
+		/// <summary>
+		/// Returns true if the specified context matches this result.
+		/// </summary>
+		/// <param name="contextIsInput">
+		/// True if the context type is an input.
+		/// </param>
+		/// <param name="contextType">
+		/// The type to check for.
+		/// </param>
+		/// <returns>
+		/// True if the context type matches the inputs or outputs.
+		/// </returns>
+		public bool MatchesContext(bool contextIsInput, Type contextType)
+		{
+			if (contextIsInput)
+			{
+				return Inputs != null && Inputs.Contains(contextType);
+			}
+			else
+			{
+				return Outputs != null && Outputs.Contains(contextType);
+			}
 		}
 	}
 }

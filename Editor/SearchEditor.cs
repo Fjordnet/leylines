@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using UnityEngine;
 
@@ -33,6 +31,11 @@ namespace Exodrifter.NodeGraph
 		private Texture2D highlight;
 		private int resultCount;
 
+		private bool justOpened = false;
+		private Socket context;
+		private bool contextWantsInput;
+		private Type contextWantsType;
+
 		#region Properties
 
 		public bool IsOpen
@@ -63,17 +66,42 @@ namespace Exodrifter.NodeGraph
 		}
 
 		public void Open
-			(Vector2 position, Vector2 spawnPosition, NodeGraphPolicy policy)
+			(Vector2 position, Vector2 spawnPosition, NodeGraphPolicy policy,
+			bool clear = false)
 		{
+			justOpened = true;
 			isOpen = true;
 			this.position = position;
 			this.spawnPosition = spawnPosition;
 			this.policy = policy;
+			if (clear)
+			{
+				searchStr = "";
+			}
 		}
 
 		public void Close()
 		{
 			isOpen = false;
+		}
+
+		public void SetWantedInputContext(GraphEditor editor, Socket socket)
+		{
+			context = socket;
+			contextWantsInput = true;
+			contextWantsType = socket.GetSocketType(editor.Graph);
+		}
+
+		public void SetWantedOutputContext(GraphEditor editor, Socket socket)
+		{
+			context = socket;
+			contextWantsInput = false;
+			contextWantsType = socket.GetSocketType(editor.Graph);
+		}
+
+		public void UnsetContext()
+		{
+			contextWantsType = null;
 		}
 
 		public void OnGUI(GraphEditor editor)
@@ -148,15 +176,22 @@ namespace Exodrifter.NodeGraph
 			var newSearchStr = GUILayout.TextField(searchStr);
 			GUI.FocusControl("search_field");
 
-			if (searchStr != newSearchStr)
+			if (searchStr != newSearchStr || justOpened)
 			{
+				justOpened = false;
+
 				if (searchJob != null)
 				{
 					searchJob.IsRunning = false;
 				}
 
+				// Define variables for capture
+				var contextType = this.contextWantsType;
+				var contextIsInput = this.contextWantsInput;
 				var newResults = new SyncList<SearchResult>();
 				results = newResults;
+
+				// Perform search
 				searchJob = new Job((job) =>
 				{
 					var scores = new List<int>();
@@ -189,6 +224,14 @@ namespace Exodrifter.NodeGraph
 
 						timeout = 0;
 						var item = policy.SearchItems[n++];
+
+						if (contextType != null)
+						{
+							if (!item.MatchesContext(contextIsInput, contextType))
+							{
+								continue;
+							}
+						}
 
 						// Score the item and insert it
 						var score = FuzzySearch(newSearchStr, item.Label);
@@ -323,8 +366,7 @@ namespace Exodrifter.NodeGraph
 				case EventType.MouseDown:
 					if (hoveringOnResult)
 					{
-						var node = results[selected].MakeNode();
-						editor.AddNode(node, spawnPosition);
+						SelectResult(editor, selected);
 						Close();
 					}
 					else if (rect.Contains(Event.current.mousePosition))
@@ -353,8 +395,7 @@ namespace Exodrifter.NodeGraph
 					{
 						case KeyCode.KeypadEnter:
 						case KeyCode.Return:
-							var node = results[selected].MakeNode();
-							editor.AddNode(node, spawnPosition);
+							SelectResult(editor, selected);
 							Close();
 							break;
 
@@ -363,6 +404,26 @@ namespace Exodrifter.NodeGraph
 							break;
 					}
 					break;
+			}
+		}
+
+		private void SelectResult(GraphEditor editor, int index)
+		{
+			var node = results[index].MakeNode();
+			editor.AddNode(node, spawnPosition);
+
+			if (context != null)
+			{
+				// Attempt to connect the two nodes
+				foreach (var other in node.GetSockets())
+				{
+					if (other.IsInput(editor.Graph) == contextWantsInput
+						&& other.GetSocketType(editor.Graph) == contextWantsType)
+					{
+						editor.Graph.Links.Add(editor.Graph, context, other);
+						break;
+					}
+				}
 			}
 		}
 

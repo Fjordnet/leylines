@@ -403,6 +403,24 @@ namespace Exodrifter.NodeGraph
 						Target = null;
 						GUI.FocusControl(null);
 					}
+					if (Target != null && Target.GetType() == typeof(Socket))
+					{
+						var clipPos = Event.current.mousePosition;
+						clipPos.y -= topToolbarRect.size.y + GRAPH_PADDING;
+						var socket = (Socket)Target;
+						if (socket.IsInput(Graph))
+						{
+							search.SetWantedOutputContext(this, socket);
+						}
+						else
+						{
+							search.SetWantedInputContext(this, socket);
+						}
+						search.Open(clipPos, GraphPosition, Graph.Policy, true);
+						Target = search;
+						GUI.FocusControl("search_field");
+						Event.current.Use();
+					}
 					break;
 
 				case EventType.ContextClick:
@@ -414,6 +432,7 @@ namespace Exodrifter.NodeGraph
 					{
 						var clipPos = Event.current.mousePosition;
 						clipPos.y -= topToolbarRect.size.y + GRAPH_PADDING;
+						search.UnsetContext();
 						search.Open(clipPos, GraphPosition, Graph.Policy);
 						Target = search;
 						GUI.FocusControl("search_field");

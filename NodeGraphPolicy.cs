@@ -189,11 +189,37 @@ namespace Exodrifter.NodeGraph
 					path = type.FullName.Replace('.', '/').Replace('+', '/');
 				}
 
-				results.Add(new SearchResult(path, () =>
+				var nodeType = type;
+				var result = new SearchResult(path, () =>
+				{
+					return (Node)ScriptableObject.CreateInstance(nodeType);
+				});
+
+				PrepareCustomContext(result, nodeType);
+
+				results.Add(result);
+			}
+		}
+
+		private void PrepareCustomContext(SearchResult result, Type nodeType)
+		{
+			var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+			var fields = nodeType.GetFields(flags);
+
+			foreach (var field in fields)
+			{
+				var attrs = field.GetCustomAttributes(true);
+				foreach (var attr in attrs)
+				{
+					if (typeof(InputAttribute).IsAssignableFrom(attr.GetType()))
 					{
-						return (Node)ScriptableObject.CreateInstance(type);
-					})
-				);
+						result.Inputs.Add(field.FieldType);
+					}
+					else if (typeof(OutputAttribute).IsAssignableFrom(attr.GetType()))
+					{
+						result.Outputs.Add(field.FieldType);
+					}
+				}
 			}
 		}
 
@@ -255,7 +281,9 @@ namespace Exodrifter.NodeGraph
 					results.Add(new SearchResult(typePath, () =>
 						{
 							return CreateDynamicNode(type);
-						})
+						},
+						null,
+						new List<Type>() { type })
 					);
 				}
 
@@ -311,11 +339,13 @@ namespace Exodrifter.NodeGraph
 					var memberPath = string.Format("{0}.{1}{2}",
 						typePath, member.Name, suffix);
 
-					results.Add(new SearchResult(memberPath, () =>
-						{
-							return CreateDynamicNode(type, member);
-						})
-					);
+					var result = new SearchResult(memberPath, () =>
+					{
+						return CreateDynamicNode(type, member);
+					});
+
+					PrepareDynamicContext(result, type, member);
+					results.Add(result);
 				}
 			}
 		}
@@ -329,6 +359,56 @@ namespace Exodrifter.NodeGraph
 				SocketFlags.AllowMultipleLinks | SocketFlags.Editable));
 
 			return node;
+		}
+
+		private void PrepareDynamicContext
+			(SearchResult result, Type type, MemberInfo member)
+		{
+			switch (member.MemberType)
+			{
+				case MemberTypes.Method:
+					var method = (MethodInfo)member;
+
+					result.Inputs.Add(typeof(ExecType));
+					result.Inputs.Add(type);
+					foreach (var param in method.GetParameters())
+					{
+						result.Inputs.Add(param.ParameterType);
+					}
+
+					result.Outputs.Add(typeof(ExecType));
+					if (method.ReturnType != typeof(void))
+					{
+						result.Outputs.Add(method.ReturnType);
+					}
+					break;
+
+				case MemberTypes.Field:
+					var field = (FieldInfo)member;
+
+					result.Inputs.Add(typeof(ExecType));
+					result.Inputs.Add(type);
+
+					result.Outputs.Add(typeof(ExecType));
+					result.Outputs.Add(field.FieldType);
+					break;
+
+				case MemberTypes.Property:
+					var property = (PropertyInfo)member;
+
+					result.Inputs.Add(typeof(ExecType));
+					result.Inputs.Add(type);
+
+					result.Outputs.Add(typeof(ExecType));
+					result.Outputs.Add(property.PropertyType);
+					break;
+
+				default:
+					Debug.LogError(string.Format(
+						"MemberType {0} is not supported.",
+						member.MemberType));
+					break;
+			}
 		}
 
 		private Node CreateDynamicNode(Type type, MemberInfo member)
