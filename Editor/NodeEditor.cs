@@ -142,21 +142,17 @@ namespace Exodrifter
 					case EventType.KeyDown:
 						switch (Event.current.keyCode)
 						{
+#if UNITY_EDITOR_OSX
+							case KeyCode.Backspace:
+								var masked = Event.current.modifiers & EventModifiers.Command;
+								if (masked == EventModifiers.Command)
+								{
+									Delete(editor, node);
+								}
+								break;
+#endif
 							case KeyCode.Delete:
-								if (!ReferenceEquals(editor.PreviousTarget, node))
-								{
-									break;
-								}
-
-								using (new UndoStack("Remove " + node.DisplayName + " Node"))
-								{
-									Undo.RegisterCompleteObjectUndo(editor.Graph, null);
-									Undo.DestroyObjectImmediate(node);
-								}
-								editor.Graph.Links.RemoveAllWith(node);
-								editor.Graph.Nodes.Remove(node);
-								editor.Target = null;
-								Event.current.Use();
+								Delete(editor, node);
 								break;
 						}
 						break;
@@ -169,6 +165,23 @@ namespace Exodrifter
 			}
 
 			GUI.enabled = true;
+		}
+
+		private static void Delete(GraphEditor editor, Node node)
+		{
+			if (!ReferenceEquals(editor.PreviousTarget, node))
+			{
+				return;
+			}
+
+			using (new UndoStack("Remove " + node.DisplayName + " Node"))
+			{
+				Undo.RegisterCompleteObjectUndo(editor.Graph, null);
+				Undo.DestroyObjectImmediate(node);
+			}
+			editor.Graph.Links.RemoveAllWith(node);
+			editor.Graph.Nodes.Remove(node);
+			editor.Target = null;
 		}
 
 		private static void DrawMembers
