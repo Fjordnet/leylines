@@ -346,11 +346,6 @@ namespace Exodrifter.NodeGraph
 		private Type[] BuildArgTypes(int startIndex, List<string> socketArgs)
 		{
 			var length = socketArgs.Count - startIndex;
-
-			if (length <= 0)
-			{
-				return null;
-			}
 			var ret = new Type[length];
 
 			for (int i = 0; i < length; ++i)
