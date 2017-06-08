@@ -40,14 +40,21 @@ namespace Exodrifter.NodeGraph
 			set
 			{
 				nodeGraph = value;
+
+				if (!Util.IsNull(nodeGraph))
+				{
+					Graph = nodeGraph.Graph;
+				}
+				else
+				{
+					Graph = null;
+				}
+
 				CacheEntryPoints();
 			}
 		}
 
-		private Graph Graph
-		{
-			get { return Util.IsNull(nodeGraph) ? null : nodeGraph.Graph; }
-		}
+		private Graph Graph { get; set; }
 
 		#endregion
 
