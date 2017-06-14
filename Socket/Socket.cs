@@ -55,6 +55,8 @@ namespace Exodrifter.NodeGraph
 
 		#endregion
 
+		private Node cachedNode;
+
 		public Socket(int nodeID, string fieldName)
 		{
 			this.nodeID = nodeID;
@@ -68,16 +70,21 @@ namespace Exodrifter.NodeGraph
 		/// <returns>The node this socket is on.</returns>
 		public Node GetNode(Graph graph)
 		{
-			var node = graph.Nodes.Find(
+			if (cachedNode != null)
+			{
+				return cachedNode;
+			}
+
+			cachedNode = graph.Nodes.Find(
 				n => { return n != null && n.ID == NodeID; }
 			);
 
-			if (Util.IsNull(node))
+			if (Util.IsNull(cachedNode))
 			{
 				var msg = "Node " + nodeID + " does not exist";
 				throw new InvalidOperationException(msg);
 			}
-			return node;
+			return cachedNode;
 		}
 
 		#region Getters/Setters

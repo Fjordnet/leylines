@@ -263,6 +263,24 @@ namespace Exodrifter.NodeGraph
 			return true;
 		}
 
+		/// <summary>
+		/// Returns true if the specified socket is the source for any
+		/// links.
+		/// </summary>
+		/// <param name="socket">The socket to check.</param>
+		/// <returns>True if the specified socket is linked from.</returns>
+		public bool IsSocketLinkedFrom(Socket socket)
+		{
+			InitCache();
+
+			if (!fromToCache.ContainsKey(socket))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 		#endregion
 
 		IEnumerator IEnumerable.GetEnumerator()

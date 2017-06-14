@@ -120,7 +120,9 @@ namespace Exodrifter.NodeGraph
 			rect.size = size;
 			rect.center = position + new Vector2(0, rect.size.y / 2);
 
-			GUI.Box(rect, GUIContent.none);
+			XGUI.ResetToStyle(GUI.skin.box);
+			XGUI.Normal.background = GraphEditor.boxTexture;
+			XGUI.Box(rect);
 
 			rect.position += Vector2.one * SEARCH_PADDING;
 			rect.size -= Vector2.one * SEARCH_PADDING * 2;

@@ -70,15 +70,23 @@ namespace Exodrifter
 			rect.center = new Vector2(node.XPos, -node.YPos) + editor.Offset;
 
 			var fullRect = new Rect(rect);
-			XGUI.ResetToStyle(GUI.skin.box);
-			XGUI.Normal.background = GraphEditor.boxTexture;
-			XGUI.Box(rect, XGUI.None);
+			XGUI.ResetToStyle(null);
+			XGUI.Color = GraphEditor.Skin.nodeColor;
+			if (editor.Target == null || !editor.Target.Equals(node))
+			{
+				XGUI.Color = GraphEditor.Skin.TintColor
+					(XGUI.Color, GraphEditor.Skin.offNodeTint);
+			}
+			XGUI.Border = GraphEditor.Skin.nodeTextureOffset;
+			XGUI.Normal.background = GraphEditor.Skin.nodeTexture;
+			XGUI.Box(rect);
 
 			var labelRect = new Rect(rect);
 			labelRect.x += BOX_PADDING;
 			labelRect.y += BOX_PADDING;
 			labelRect.height = EditorGUIUtility.singleLineHeight;
 			XGUI.ResetToStyle(GUI.skin.label);
+			XGUI.FontStyle = FontStyle.Bold;
 			XGUI.Label(labelRect, node.DisplayName);
 
 			rect.x += BOX_PADDING;
@@ -137,7 +145,6 @@ namespace Exodrifter
 					case EventType.MouseUp:
 						if (ReferenceEquals(editor.Target, node))
 						{
-							editor.Target = null;
 							Event.current.Use();
 						}
 						break;

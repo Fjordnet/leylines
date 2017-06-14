@@ -29,8 +29,28 @@ namespace Exodrifter.NodeGraph
 		public static void DrawSocket
 			(GraphEditor editor, Node node, Socket socket, Rect rect)
 		{
-			GUI.Box(rect, GUIContent.none);
 			editor.rectCache[socket] = rect;
+
+			var socketType = socket.GetSocketType(editor.Graph);
+			var color = GraphEditor.Skin.objectSocketColor;
+			var style = GraphEditor.Skin.paramSocketStyle;
+			if (socketType == typeof(ExecType))
+			{
+				color = GraphEditor.Skin.execSocketColor;
+				style = GraphEditor.Skin.execSocketStyle;
+			}
+			else if (socketType.IsPrimitive)
+			{
+				color = GraphEditor.Skin.primitiveSocketColor;
+			}
+
+			var on = editor.Graph.Links.IsSocketLinkedTo(socket)
+				|| editor.Graph.Links.IsSocketLinkedFrom(socket);
+
+			XGUI.ResetToStyle(null);
+			XGUI.Normal.background = on ? style.onSocketTexture : style.offSocketTexture;
+			XGUI.Color = on ? color : GraphEditor.Skin.TintColor(color, GraphEditor.Skin.offSocketTint);
+			XGUI.Box(rect);
 
 			if (!GUI.enabled)
 			{

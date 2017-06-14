@@ -34,6 +34,26 @@ namespace Exodrifter.NodeGraph
 		[SerializeField]
 		private int graphID = 0;
 
+		private static NodeGraphSkin skin;
+		public static NodeGraphSkin Skin
+		{
+			get
+			{
+				if (skin != null)
+				{
+					return skin;
+				}
+
+				string[] guids = AssetDatabase.FindAssets("t:NodeGraphSkin");
+				foreach (var guid in guids)
+				{
+					var path = AssetDatabase.GUIDToAssetPath(guid);
+					skin = AssetDatabase.LoadAssetAtPath<NodeGraphSkin>(path);
+				}
+				return skin;
+			}
+		}
+
 		#region Properties
 
 		private Graph graph;
@@ -134,6 +154,7 @@ namespace Exodrifter.NodeGraph
 
 		#endregion
 
+		public static Texture2D flatTexture;
 		public static Texture2D boxTexture;
 
 		void OnGUI()
@@ -166,6 +187,13 @@ namespace Exodrifter.NodeGraph
 
 				boxTexture.SetPixels(colors);
 				boxTexture.Apply();
+			}
+			if (flatTexture == null)
+			{
+				flatTexture = new Texture2D(1, 1);
+				flatTexture.filterMode = FilterMode.Point;
+				flatTexture.SetPixels(new Color[1] { Color.white });
+				flatTexture.Apply();
 			}
 
 			rectCache = rectCache ?? new Dictionary<Socket, Rect>();
@@ -250,8 +278,10 @@ namespace Exodrifter.NodeGraph
 
 			// Draw the graph
 			{
-				XGUI.ResetToStyle(GUI.skin.box);
-				XGUI.Box(graphRect, XGUI.None);
+				XGUI.ResetToStyle(null);
+				XGUI.BackgroundColor = Skin.canvasColor;
+				XGUI.Normal.background = flatTexture;
+				XGUI.Box(graphRect);
 
 				// Make the clipping window for the graph
 				graphRect.position += Vector2.one * GRAPH_PADDING;
@@ -277,9 +307,14 @@ namespace Exodrifter.NodeGraph
 					if (Target is Socket)
 					{
 						var socket = (Socket)Target;
-						DrawConnection(rectCache[socket].center,
-							Event.current.mousePosition,
-							socket.IsInput(Graph), true);
+
+						if (rectCache.ContainsKey(socket))
+						{
+							DrawConnection(rectCache[socket].center,
+								Event.current.mousePosition,
+								socket.IsInput(Graph), true,
+								Skin.tempLinkColor);
+						}
 					}
 					foreach (var link in Graph.Links)
 					{
@@ -291,7 +326,19 @@ namespace Exodrifter.NodeGraph
 
 						var from = rectCache[link.FromSocket].center;
 						var to = rectCache[link.ToSocket].center;
-						DrawConnection(from, to, false, false);
+
+						var socketType = link.FromSocket.GetSocketType(Graph);
+						var color = Skin.objectSocketColor;
+						if (socketType == typeof(ExecType))
+						{
+							color = Skin.execSocketColor;
+						}
+						if (socketType.IsPrimitive)
+						{
+							color = Skin.primitiveSocketColor;
+						}
+
+						DrawConnection(from, to, false, false, color);
 					}
 				}
 
@@ -462,7 +509,7 @@ namespace Exodrifter.NodeGraph
 		/// Render a node connection between two points.
 		/// </summary>
 		private static void DrawConnection
-			(Vector2 from, Vector2 to, bool left, bool mouse, Color? color = null)
+			(Vector2 from, Vector2 to, bool left, bool mouse, Color color)
 		{
 			var size = NodeEditor.SOCKET_RADIUS;
 			Handles.DrawBezier(
@@ -470,7 +517,7 @@ namespace Exodrifter.NodeGraph
 				new Vector3(to.x + (mouse ? 0 : (left ? size : -size)), to.y, 0.0f),
 				new Vector3(from.x, from.y, 0.0f) + Vector3.right * 50.0f * (left ? -1.0f : 1.0f),
 				new Vector3(to.x, to.y, 0.0f) + Vector3.right * 50.0f * (left ? 1.0f : -1.0f),
-				color ?? new Color(.4f, .4f, .4f, 1),
+				color,
 				null,
 				size / 2
 			);
@@ -496,14 +543,14 @@ namespace Exodrifter.NodeGraph
 				var from = new Vector2(v.x, v.y + graphArea.size.y / 2);
 				var to = new Vector2(v.x, v.y - graphArea.size.y / 2);
 
-				Handles.color = new Color(.5f, .5f, .5f, .5f);
+				Handles.color = Skin.canvasCellLineColor;
 				if (startX == 0)
 				{
-					Handles.color = new Color(0f, 0f, 0f, 1f);
+					Handles.color = Skin.canvasAxisLineColor;
 				}
 				else if (startX % (GRID_CELL_SIZE * 10) == 0)
 				{
-					Handles.color = new Color(.1f, .1f, .1f, .75f);
+					Handles.color = Skin.canvasChunkLineColor;
 				}
 
 				Handles.DrawLine(from, to);
@@ -516,14 +563,14 @@ namespace Exodrifter.NodeGraph
 				var from = new Vector2(v.x + graphArea.size.x / 2, v.y);
 				var to = new Vector2(v.x - graphArea.size.x / 2, v.y);
 
-				Handles.color = new Color(.5f, .5f, .5f, .5f);
+				Handles.color = Skin.canvasCellLineColor;
 				if (startY == 0)
 				{
-					Handles.color = new Color(0f, 0f, 0f, 1f);
+					Handles.color = Skin.canvasAxisLineColor;
 				}
 				else if (startY % (GRID_CELL_SIZE * 10) == 0)
 				{
-					Handles.color = new Color(.1f, .1f, .1f, .75f);
+					Handles.color = Skin.canvasChunkLineColor;
 				}
 
 				Handles.DrawLine(from, to);

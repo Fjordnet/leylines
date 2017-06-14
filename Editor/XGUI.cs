@@ -477,6 +477,12 @@ namespace Exodrifter.NodeGraph
 				GUILayout.BeginVertical(content, style, options);
 		}
 
+		public static void Box(Rect rect)
+		{
+			using (new XGUIStatic())
+				GUI.Box(rect, GUIContent.none, style);
+		}
+
 		public static void Box(Rect rect, string text)
 		{
 			using (new XGUIStatic())
@@ -493,6 +499,12 @@ namespace Exodrifter.NodeGraph
 		{
 			using (new XGUIStatic())
 				GUI.Box(rect, content, style);
+		}
+
+		public static void Box(params GUILayoutOption[] options)
+		{
+			using (new XGUIStatic())
+				GUILayout.Box(GUIContent.none, style, options);
 		}
 
 		public static void Box(string text, params GUILayoutOption[] options)
