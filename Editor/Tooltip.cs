@@ -38,24 +38,19 @@ namespace Exodrifter.NodeGraph
 
 		internal void OnGUI()
 		{
-			var content = new GUIContent(Text);
-
-			var richText = GUI.skin.label.richText;
-			var alignment = GUI.skin.box.alignment;
-			GUI.skin.label.richText = true;
-			GUI.skin.box.alignment = TextAnchor.UpperLeft;
-
-			var size = GUI.skin.label.CalcSize(content);
-
 			var popupRect = new Rect();
 			popupRect.xMin = Event.current.mousePosition.x + 10;
 			popupRect.yMin = Event.current.mousePosition.y + 10;
-			popupRect.size = size;
-			GUI.Box(popupRect, GUIContent.none);
-			GUI.Label(popupRect, content);
+			popupRect.size = GUI.skin.label.CalcSize(new GUIContent(Text));
 
-			GUI.skin.label.richText = richText;
-			GUI.skin.box.alignment = alignment;
+			XGUI.ResetToStyle(GUI.skin.box);
+			XGUI.Normal.background = GraphEditor.boxTexture;
+			XGUI.Box(popupRect, XGUI.None);
+
+			XGUI.ResetToStyle(GUI.skin.label);
+			XGUI.RichText = true;
+			XGUI.Alignment = TextAnchor.UpperLeft;
+			XGUI.Label(popupRect, Text);
 		}
 	}
 }

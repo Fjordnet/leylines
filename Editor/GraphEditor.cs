@@ -134,55 +134,38 @@ namespace Exodrifter.NodeGraph
 
 		#endregion
 
-		[SerializeField]
-		private Texture2D oldTex;
-		[SerializeField]
-		private Texture2D boxTexture;
+		public static Texture2D boxTexture;
 
 		void OnGUI()
 		{
-			// Looks like the editor crashed before setting back the old
-			// texture at the end of the method
-			var oldTex = GUI.skin.box.normal.background;
-			if (oldTex == null)
-			{
-				oldTex = this.oldTex;
-				GUI.skin.box.normal.background = oldTex;
-			}
-			this.oldTex = oldTex;
-
 			// Make the box texture opaque
-			if (EditorGUIUtility.isProSkin)
+			if (EditorGUIUtility.isProSkin && boxTexture == null)
 			{
-				if (boxTexture == null && oldTex != null)
+				// Make a copy of the old texture
+				var oldTex = GUI.skin.box.normal.background;
+				var tmp = RenderTexture.GetTemporary(oldTex.width, oldTex.height);
+
+				Graphics.Blit(oldTex, tmp);
+				RenderTexture previous = RenderTexture.active;
+				RenderTexture.active = tmp;
+				boxTexture = new Texture2D(oldTex.width, oldTex.height);
+				boxTexture.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
+				RenderTexture.active = previous;
+				RenderTexture.ReleaseTemporary(tmp);
+
+				// Remove alpha
+				var colors = boxTexture.GetPixels();
+				for (int i = 0; i < colors.Length; ++i)
 				{
-					// Make a copy of the old texture
-					var tmp = RenderTexture.GetTemporary(oldTex.width, oldTex.height);
-
-					Graphics.Blit(oldTex, tmp);
-					RenderTexture previous = RenderTexture.active;
-					RenderTexture.active = tmp;
-					boxTexture = new Texture2D(oldTex.width, oldTex.height);
-					boxTexture.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
-					RenderTexture.active = previous;
-					RenderTexture.ReleaseTemporary(tmp);
-
-					// Remove alpha
-					var colors = boxTexture.GetPixels();
-					for (int i = 0; i < colors.Length; ++i)
-					{
-						// Pro background color is RGB(64, 64, 64)
-						colors[i].r = 0.2196f + (colors[i].r * colors[i].a);
-						colors[i].g = 0.2196f + (colors[i].g * colors[i].a);
-						colors[i].b = 0.2196f + (colors[i].b * colors[i].a);
-						colors[i].a = 1;
-					}
-
-					boxTexture.SetPixels(colors);
-					boxTexture.Apply();
+					// Pro background color is RGB(64, 64, 64)
+					colors[i].r = 0.2196f + (colors[i].r * colors[i].a);
+					colors[i].g = 0.2196f + (colors[i].g * colors[i].a);
+					colors[i].b = 0.2196f + (colors[i].b * colors[i].a);
+					colors[i].a = 1;
 				}
 
-				GUI.skin.box.normal.background = boxTexture;
+				boxTexture.SetPixels(colors);
+				boxTexture.Apply();
 			}
 
 			rectCache = rectCache ?? new Dictionary<Socket, Rect>();
@@ -208,81 +191,73 @@ namespace Exodrifter.NodeGraph
 			var toolbarHeight = Vector2.up * TOOLBAR_HEIGHT;
 
 			var topToolbarRect = new Rect(position);
-			topToolbarRect.position = new Vector2(4, 4);
+			topToolbarRect.position = Vector2.zero;
 			topToolbarRect.size -= new Vector2(10, 0);
 			topToolbarRect.height = toolbarHeight.y;
 
-			GUILayout.BeginArea(topToolbarRect);
-			GUILayout.BeginHorizontal();
+			XGUI.ResetToStyle(null);
+			XGUI.BeginArea(new Rect(0, 0, position.width - 10, TOOLBAR_HEIGHT));
+			XGUI.BeginHorizontal();
 
-			GUI.enabled = Graph != null;
-			if (GUILayout.Button("Save", GUILayout.MaxHeight(15)))
+			XGUI.ResetToStyle(GUI.skin.button);
+			XGUI.Enabled = Graph != null;
+			if (XGUI.Button("Save", XGUI.Height(15)))
 			{
 				AssetDatabase.SaveAssets();
 			}
-			GUI.enabled = true;
 
 			var oldGraph = Graph;
-			Graph = EditorGUILayout.ObjectField(Graph, typeof(Graph), false) as Graph;
+			Graph = XGUI.ObjectField(Graph, false);
 			if (Graph != oldGraph)
 			{
-				if (!Util.IsNull(Graph))
-				{
-					CenterViewOn(Graph.CalculateCenter());
-				}
-				else
-				{
-					CenterViewOn(Vector2.zero);
-				}
+				CenterView();
 			}
-			GUILayout.FlexibleSpace();
 
-			GUILayout.EndHorizontal();
-			GUILayout.EndArea();
+			XGUI.FlexibleSpace();
+
+			XGUI.EndHorizontal();
+			XGUI.EndArea();
 
 			// Bottom Toolbar
-			var bottomToolbarRect = new Rect(topToolbarRect);
-			bottomToolbarRect.y = position.size.y - toolbarHeight.y + 2;
+			XGUI.ResetToStyle(null);
+			XGUI.BeginArea(new Rect(0, position.size.y - TOOLBAR_HEIGHT, position.width - 10, TOOLBAR_HEIGHT));
+			XGUI.BeginHorizontal();
 
-			GUILayout.BeginArea(bottomToolbarRect);
-			GUILayout.BeginHorizontal();
+			XGUI.ResetToStyle(GUI.skin.button);
+			XGUI.Enabled = Graph != null;
+			snap = XGUI.ToggleButton(snap, "Snap");
 
-			GUI.enabled = Graph != null;
-			snap = GUILayout.Toggle(snap, "Snap", GUI.skin.button);
-			if (GUILayout.Button("Center View"))
+			XGUI.ResetToStyle(GUI.skin.button);
+			XGUI.Enabled = Graph != null;
+			if (XGUI.Button("Center View"))
 			{
-				if (Graph != null)
-				{
-					CenterViewOn(Graph.CalculateCenter());
-				}
-				else
-				{
-					CenterViewOn(Vector2.zero);
-				}
+				CenterView();
 			}
-			GUI.enabled = true;
 
-			GUILayout.FlexibleSpace();
+			XGUI.FlexibleSpace();
 
-			var label = "";
 			if (graphRect.Contains(mousePos))
 			{
-				label = string.Format("{0}, {1}",
-					GraphPosition.x, GraphPosition.y);
+				XGUI.ResetToStyle(GUI.skin.label);
+				XGUI.Alignment = TextAnchor.MiddleRight;
+				XGUI.Label(
+					string.Format("{0}, {1}", GraphPosition.x, GraphPosition.y),
+					XGUI.ExpandHeight(true));
 			}
-			GUILayout.Label(label);
 
-			GUILayout.EndHorizontal();
-			GUILayout.EndArea();
+			XGUI.EndHorizontal();
+			XGUI.EndArea();
 
 			// Draw the graph
 			{
-				GUI.Box(graphRect, GUIContent.none);
+				XGUI.ResetToStyle(GUI.skin.box);
+				XGUI.Box(graphRect, XGUI.None);
 
 				// Make the clipping window for the graph
 				graphRect.position += Vector2.one * GRAPH_PADDING;
 				graphRect.size -= Vector2.one * GRAPH_PADDING * 2;
-				GUI.BeginClip(graphRect);
+				XGUI.ResetToStyle(null);
+				XGUI.BeginClip(graphRect);
 
 				// Draw the graph
 				var gridRect = new Rect(Vector2.zero, graphRect.size);
@@ -472,7 +447,6 @@ namespace Exodrifter.NodeGraph
 					break;
 			}
 
-			GUI.skin.box.normal.background = oldTex;
 			Repaint();
 		}
 
@@ -568,7 +542,19 @@ namespace Exodrifter.NodeGraph
 			return new Vector2(x, y);
 		}
 
-		public void CenterViewOn(Vector2 newPosition)
+		private void CenterView()
+		{
+			if (Graph != null)
+			{
+				CenterViewOn(Graph.CalculateCenter());
+			}
+			else
+			{
+				CenterViewOn(Vector2.zero);
+			}
+		}
+
+		private void CenterViewOn(Vector2 newPosition)
 		{
 			var pos = new Vector2(-newPosition.x, newPosition.y);
 			Offset = pos + GetGraphRect().size / 2;
