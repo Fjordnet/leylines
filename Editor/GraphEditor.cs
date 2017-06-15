@@ -508,6 +508,7 @@ namespace Exodrifter.NodeGraph
 						var socket = new DynamicSocket(type, type.Name,
 							SocketFlags.AllowMultipleLinks | SocketFlags.Editable);
 						socket.SocketValue = obj;
+						node.DisplayName = obj.GetType().Name;
 						node.AddOutputSocket(socket);
 						AddNode(node, GraphPosition);
 					}
