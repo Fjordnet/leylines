@@ -307,6 +307,7 @@ namespace Exodrifter
 					}
 				}
 
+				XGUI.Enabled = !editor.search.IsOpen;
 				var prop = serializedObject.FindProperty(socket.FieldName);
 				if (type == typeof(bool))
 				{
