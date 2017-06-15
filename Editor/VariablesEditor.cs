@@ -77,12 +77,21 @@ namespace Exodrifter.NodeGraph
 				list.elementHeightCallback += ElementHeight;
 				list.drawElementCallback += DrawElement;
 				list.onAddCallback += OnAdd;
+				list.onRemoveCallback = OnRemoveCallback;
 			}
 		}
 
-		void OnAdd (ReorderableList list)
+		void OnAdd(ReorderableList list)
 		{
 			AddVariableWindow.Launch(this, list);
+		}
+
+		void OnRemoveCallback(ReorderableList list)
+		{
+			if (EditorUtility.DisplayDialog
+				("Warning!", "Are you sure?", "Yes", "No")) {
+				ReorderableList.defaultBehaviours.DoRemoveButton(list);
+			}
 		}
 
 		private float ElementHeight(int index)
