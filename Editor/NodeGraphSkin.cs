@@ -16,7 +16,11 @@ namespace Exodrifter.NodeGraph
 		[Range(0f, 1f)]
 		public float offNodeTint = 0.5f;
 		public Color nodeColor;
-		public Texture2D nodeTexture;
+		public Color nodeFrameColor;
+		public Color nodeTextHeaderColor;
+		public Color nodeTextColor;
+		public Texture2D nodeBackgroundTexture;
+		public Texture2D nodeFrameTexture;
 		public RectOffset nodeTextureOffset;
 
 		[Header("Sockets")]
@@ -31,6 +35,13 @@ namespace Exodrifter.NodeGraph
 
 		[Header("Links")]
 		public Color tempLinkColor;
+
+		[Header("Tooltips")]
+		public Color tooltipColor;
+		public Color tooltipTextColor;
+		public Texture2D tooltipBackground;
+		public RectOffset tooltipTextureOffset;
+		public RectOffset tooltipPadding;
 
 		public Color TintColor(Color color, float tint)
 		{

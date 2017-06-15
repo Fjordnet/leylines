@@ -70,6 +70,7 @@ namespace Exodrifter
 			rect.center = new Vector2(node.XPos, -node.YPos) + editor.Offset;
 
 			var fullRect = new Rect(rect);
+
 			XGUI.ResetToStyle(null);
 			XGUI.Color = GraphEditor.Skin.nodeColor;
 			if (editor.Target == null || !editor.Target.Equals(node))
@@ -78,15 +79,25 @@ namespace Exodrifter
 					(XGUI.Color, GraphEditor.Skin.offNodeTint);
 			}
 			XGUI.Border = GraphEditor.Skin.nodeTextureOffset;
-			XGUI.Normal.background = GraphEditor.Skin.nodeTexture;
+			XGUI.Normal.background = GraphEditor.Skin.nodeBackgroundTexture;
 			XGUI.Box(rect);
+
+			if (editor.Target != null && editor.Target.Equals(node))
+			{
+				XGUI.ResetToStyle(null);
+				XGUI.Color = GraphEditor.Skin.nodeFrameColor;
+				XGUI.Border = GraphEditor.Skin.nodeTextureOffset;
+				XGUI.Normal.background = GraphEditor.Skin.nodeFrameTexture;
+				XGUI.Box(rect);
+			}
 
 			var labelRect = new Rect(rect);
 			labelRect.x += BOX_PADDING;
 			labelRect.y += BOX_PADDING;
 			labelRect.height = EditorGUIUtility.singleLineHeight;
-			XGUI.ResetToStyle(GUI.skin.label);
+			XGUI.ResetToStyle(null);
 			XGUI.FontStyle = FontStyle.Bold;
+			XGUI.Normal.textColor = GraphEditor.Skin.nodeTextHeaderColor;
 			XGUI.Label(labelRect, node.DisplayName);
 
 			rect.x += BOX_PADDING;
@@ -284,7 +295,9 @@ namespace Exodrifter
 				var prop = serializedObject.FindProperty(socket.FieldName);
 				if (type == typeof(bool))
 				{
-					value = EditorGUI.ToggleLeft(rect, name, (bool)value);
+					XGUI.ResetToStyle(null);
+					XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
+					value = XGUI.ToggleLeft(rect, name, (bool)value);
 					node.SetSocketValue(socket, value);
 				}
 				else if (prop != null)
@@ -293,9 +306,10 @@ namespace Exodrifter
 				}
 				else if (type == null)
 				{
-					GUI.enabled = false;
-					EditorGUI.TextField(rect, GUIContent.none, "Unknown Type");
-					GUI.enabled = true;
+					XGUI.ResetToStyle(null);
+					XGUI.Enabled = false;
+					XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
+					XGUI.TextField(rect, "Unknown Type");
 				}
 				else
 				{
@@ -306,7 +320,9 @@ namespace Exodrifter
 			}
 			else
 			{
-				EditorGUI.LabelField(rect, name);
+				XGUI.ResetToStyle(null);
+				XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
+				XGUI.Label(rect, name);
 			}
 
 			// Prepare a tooltip

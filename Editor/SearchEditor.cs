@@ -116,6 +116,8 @@ namespace Exodrifter.NodeGraph
 				return;
 			}
 
+			GUI.enabled = true;
+
 			var rect = new Rect();
 			rect.size = size;
 			rect.center = position + new Vector2(0, rect.size.y / 2);

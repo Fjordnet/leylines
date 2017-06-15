@@ -54,25 +54,33 @@ namespace Exodrifter.NodeGraph
 				return false;
 			}
 
+			var link = new Link(graph, from, to);
+			links.Add(link);
+
+			// Update Cache
 			InitCache();
 
-			var link = new Link(graph, from, to);
-			if (fromToCache.ContainsKey(from))
+			if (fromToCache.ContainsKey(from)
+				&& !fromToCache[from].Contains(to))
 			{
-				if (!fromToCache[from].Contains(to))
-				{
-					links.Add(link);
-					fromToCache[from].Add(to);
-					return true;
-				}
+				fromToCache[from].Add(to);
 			}
 			else
 			{
-				links.Add(link);
 				fromToCache[from] = new List<Socket>() { to };
-				return true;
 			}
-			return false;
+
+			if (toFromCache.ContainsKey(to)
+				&& !toFromCache[to].Contains(from))
+			{
+				toFromCache[to].Add(from);
+			}
+			else
+			{
+				toFromCache[to] = new List<Socket>() { from };
+			}
+
+			return true;
 		}
 
 		/// <summary>
@@ -123,12 +131,32 @@ namespace Exodrifter.NodeGraph
 		{
 			// Update cache
 			InitCache();
+
 			if (fromToCache.ContainsKey(socket))
 			{
+				foreach (var other in fromToCache[socket])
+				{
+					toFromCache[other].Remove(socket);
+					if (toFromCache[other].Count == 0)
+					{
+						toFromCache.Remove(other);
+					}
+				}
+
 				fromToCache.Remove(socket);
 			}
+
 			if (toFromCache.ContainsKey(socket))
 			{
+				foreach (var other in toFromCache[socket])
+				{
+					fromToCache[other].Remove(socket);
+					if (fromToCache[other].Count == 0)
+					{
+						fromToCache.Remove(other);
+					}
+				}
+
 				toFromCache.Remove(socket);
 			}
 
@@ -147,29 +175,44 @@ namespace Exodrifter.NodeGraph
 		{
 			// Update cache
 			InitCache();
-			var toRemove = new List<Socket>();
-			foreach (var socket in fromToCache.Keys)
-			{
-				if (socket.NodeID == node.ID)
-				{
-					toRemove.Add(socket);
-				}
-			}
-			foreach(var socket in toRemove)
-			{
-				fromToCache.Remove(socket);
-			}
-			toRemove = new List<Socket>();
-			foreach (var socket in toFromCache.Keys)
-			{
-				if (socket.NodeID == node.ID)
-				{
-					toRemove.Add(socket);
-				}
-			}
-			foreach (var socket in toRemove)
+
+			var removed = new List<Socket>();
+			foreach (var socket in node.GetSockets())
 			{
 				toFromCache.Remove(socket);
+				fromToCache.Remove(socket);
+
+				removed.Add(socket);
+			}
+
+			foreach (var socket in removed)
+			{
+				var toRemove = new List<Socket>();
+				foreach (var kvp in toFromCache)
+				{
+					kvp.Value.Remove(socket);
+					if (kvp.Value.Count == 0)
+					{
+						toRemove.Add(kvp.Key);
+					}
+				}
+				foreach (var key in toRemove)
+				{
+					toFromCache.Remove(key);
+				}
+
+				foreach (var kvp in fromToCache)
+				{
+					kvp.Value.Remove(socket);
+					if (kvp.Value.Count == 0)
+					{
+						toRemove.Add(kvp.Key);
+					}
+				}
+				foreach (var key in toRemove)
+				{
+					fromToCache.Remove(key);
+				}
 			}
 
 			// Update serialized data
@@ -254,13 +297,7 @@ namespace Exodrifter.NodeGraph
 		public bool IsSocketLinkedTo(Socket socket)
 		{
 			InitCache();
-
-			if (!toFromCache.ContainsKey(socket))
-			{
-				return false;
-			}
-
-			return true;
+			return toFromCache.ContainsKey(socket);
 		}
 
 		/// <summary>
@@ -272,13 +309,7 @@ namespace Exodrifter.NodeGraph
 		public bool IsSocketLinkedFrom(Socket socket)
 		{
 			InitCache();
-
-			if (!fromToCache.ContainsKey(socket))
-			{
-				return false;
-			}
-
-			return true;
+			return fromToCache.ContainsKey(socket);
 		}
 
 		#endregion

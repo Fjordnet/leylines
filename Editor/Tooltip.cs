@@ -38,18 +38,27 @@ namespace Exodrifter.NodeGraph
 
 		internal void OnGUI()
 		{
+			var offset = GraphEditor.Skin.tooltipPadding;
+
 			var popupRect = new Rect();
 			popupRect.xMin = Event.current.mousePosition.x + 10;
 			popupRect.yMin = Event.current.mousePosition.y + 10;
 			popupRect.size = GUI.skin.label.CalcSize(new GUIContent(Text));
+			popupRect.size += new Vector2(offset.horizontal, offset.vertical);
 
-			XGUI.ResetToStyle(GUI.skin.box);
-			XGUI.Normal.background = GraphEditor.boxTexture;
+			XGUI.ResetToStyle(null);
+			XGUI.Color = GraphEditor.Skin.tooltipColor;
+			XGUI.Border = GraphEditor.Skin.tooltipTextureOffset;
+			XGUI.Normal.background = GraphEditor.Skin.tooltipBackground;
 			XGUI.Box(popupRect, XGUI.None);
 
-			XGUI.ResetToStyle(GUI.skin.label);
+			popupRect.xMin += offset.left;
+			popupRect.yMin += offset.right;
+
+			XGUI.ResetToStyle(null);
 			XGUI.RichText = true;
 			XGUI.Alignment = TextAnchor.UpperLeft;
+			XGUI.Normal.textColor = GraphEditor.Skin.tooltipTextColor;
 			XGUI.Label(popupRect, Text);
 		}
 	}
