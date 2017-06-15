@@ -196,7 +196,7 @@ namespace Exodrifter
 
 		private static void Delete(GraphEditor editor, Node node)
 		{
-			if (!ReferenceEquals(editor.PreviousTarget, node))
+			if (!ReferenceEquals(editor.Target, node))
 			{
 				return;
 			}
