@@ -16,6 +16,7 @@ MonoBehaviour:
   canvasCellLineColor: {r: 0.1882353, g: 0.1882353, b: 0.1882353, a: 1}
   canvasChunkLineColor: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 1}
   offNodeTint: 0.75
+  offNodeTextTint: 0.5
   nodeColor: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 1}
   nodeFrameColor: {r: 0.4705882, g: 0.4705882, b: 0.4705882, a: 1}
   nodeTextHeaderColor: {r: 1, g: 1, b: 1, a: 1}

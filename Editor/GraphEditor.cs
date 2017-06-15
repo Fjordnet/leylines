@@ -359,6 +359,10 @@ namespace Exodrifter.NodeGraph
 							color = Skin.primitiveSocketColor;
 						}
 
+						if (search.IsOpen)
+						{
+							color = Skin.TintColor(color, Skin.disabledSocketTint);
+						}
 						DrawConnection(from, to, false, false, color);
 					}
 				}

@@ -97,7 +97,13 @@ namespace Exodrifter
 			labelRect.height = EditorGUIUtility.singleLineHeight;
 			XGUI.ResetToStyle(null);
 			XGUI.FontStyle = FontStyle.Bold;
+
 			XGUI.Normal.textColor = GraphEditor.Skin.nodeTextHeaderColor;
+			if (editor.search.IsOpen)
+			{
+				XGUI.Normal.textColor = GraphEditor.Skin.TintColor(
+					XGUI.Normal.textColor, GraphEditor.Skin.disabledNodeTextTint);
+			}
 			XGUI.Label(labelRect, node.DisplayName);
 
 			rect.x += BOX_PADDING;
@@ -246,6 +252,15 @@ namespace Exodrifter
 
 			rect.height = EditorGUIUtility.singleLineHeight;
 
+			XGUI.ResetToStyle(null);
+			XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
+
+			if (editor.search.IsOpen)
+			{
+				XGUI.Normal.textColor = GraphEditor.Skin.TintColor(
+					XGUI.Normal.textColor, GraphEditor.Skin.disabledNodeTextTint);
+			}
+
 			var clipboardHasValue = false;
 			var hovering = rect.Contains(Event.current.mousePosition)
 				&& !editor.search.IsOpen;
@@ -295,8 +310,6 @@ namespace Exodrifter
 				var prop = serializedObject.FindProperty(socket.FieldName);
 				if (type == typeof(bool))
 				{
-					XGUI.ResetToStyle(null);
-					XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
 					value = XGUI.ToggleLeft(rect, name, (bool)value);
 					node.SetSocketValue(socket, value);
 				}
@@ -306,9 +319,7 @@ namespace Exodrifter
 				}
 				else if (type == null)
 				{
-					XGUI.ResetToStyle(null);
 					XGUI.Enabled = false;
-					XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
 					XGUI.TextField(rect, "Unknown Type");
 				}
 				else
@@ -320,8 +331,6 @@ namespace Exodrifter
 			}
 			else
 			{
-				XGUI.ResetToStyle(null);
-				XGUI.Normal.textColor = GraphEditor.Skin.nodeTextColor;
 				XGUI.Label(rect, name);
 			}
 

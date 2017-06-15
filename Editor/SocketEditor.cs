@@ -50,6 +50,7 @@ namespace Exodrifter.NodeGraph
 			XGUI.ResetToStyle(null);
 			XGUI.Normal.background = on ? style.onSocketTexture : style.offSocketTexture;
 			XGUI.Color = on ? color : GraphEditor.Skin.TintColor(color, GraphEditor.Skin.offSocketTint);
+			XGUI.Color = !editor.search.IsOpen ? XGUI.Color : GraphEditor.Skin.TintColor(XGUI.Color, GraphEditor.Skin.disabledSocketTint);
 			XGUI.Box(rect);
 
 			if (!GUI.enabled)

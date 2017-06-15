@@ -15,6 +15,8 @@ namespace Exodrifter.NodeGraph
 		[Header("Node")]
 		[Range(0f, 1f)]
 		public float offNodeTint = 0.5f;
+		[Range(0f, 1f)]
+		public float disabledNodeTextTint = 0.5f;
 		public Color nodeColor;
 		public Color nodeFrameColor;
 		public Color nodeTextHeaderColor;
@@ -26,6 +28,8 @@ namespace Exodrifter.NodeGraph
 		[Header("Sockets")]
 		[Range(0f, 1f)]
 		public float offSocketTint = 0.5f;
+		[Range(0f, 1f)]
+		public float disabledSocketTint = 0.5f;
 		public Color execSocketColor;
 		public Color primitiveSocketColor;
 		public Color objectSocketColor;
@@ -34,6 +38,8 @@ namespace Exodrifter.NodeGraph
 		public SocketStyle execSocketStyle;
 
 		[Header("Links")]
+		[Range(0f, 1f)]
+		public float disabledLinkTint = 0.5f;
 		public Color tempLinkColor;
 
 		[Header("Tooltips")]
