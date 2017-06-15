@@ -135,7 +135,7 @@ namespace Exodrifter.NodeGraph
 
 			window.titleContent = new GUIContent("Node Graph");
 			window.Graph = graph;
-			window.CenterViewOn(Vector2.zero);
+			window.CenterView();
 			window.Show();
 		}
 
