@@ -34,6 +34,8 @@ namespace Exodrifter.NodeGraph
 		[SerializeField]
 		private SocketBimap links;
 		[SerializeField]
+		private VariableDictionary variables;
+		[SerializeField]
 		private int nextNodeID;
 		[SerializeField]
 		private NodeGraphPolicy policy = NodeGraphPolicy.DefaultPolicy;
@@ -64,6 +66,19 @@ namespace Exodrifter.NodeGraph
 				return links;
 			}
 			set { links = value; }
+		}
+
+		/// <summary>
+		/// A list of variables in this graph.
+		/// </summary>
+		public VariableDictionary Variables
+		{
+			get
+			{
+				variables = variables ?? new VariableDictionary();
+				return variables;
+			}
+			set { variables = value; }
 		}
 
 		/// <summary>

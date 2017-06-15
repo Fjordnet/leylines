@@ -86,6 +86,12 @@ namespace Exodrifter.NodeGraph
 			}
 		}
 
+		public string TypeString
+		{
+			get { return typeStr; }
+			set { typeStr = value; }
+		}
+
 		public Type Type
 		{
 			get

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEditor;
 
 namespace Exodrifter.NodeGraph
 {
@@ -11,6 +12,9 @@ namespace Exodrifter.NodeGraph
 		private Color oldContentColor;
 		private Matrix4x4 oldMatrix;
 
+		private float oldFieldWidth;
+		private float oldLabelWidth;
+
 		public XGUIStatic()
 		{
 			oldBackgroundColor = GUI.backgroundColor;
@@ -19,11 +23,17 @@ namespace Exodrifter.NodeGraph
 			oldEnabled = GUI.enabled;
 			oldMatrix = GUI.matrix;
 
+			oldFieldWidth = EditorGUIUtility.fieldWidth;
+			oldLabelWidth = EditorGUIUtility.labelWidth;
+
 			GUI.backgroundColor = XGUI.BackgroundColor;
 			GUI.color = XGUI.Color;
 			GUI.contentColor = XGUI.ContentColor;
 			GUI.enabled = XGUI.Enabled;
 			GUI.matrix = XGUI.Matrix;
+
+			EditorGUIUtility.fieldWidth = XGUI.FieldWidth;
+			EditorGUIUtility.labelWidth = XGUI.LabelWidth;
 		}
 
 		public void Dispose()
@@ -33,6 +43,9 @@ namespace Exodrifter.NodeGraph
 			GUI.contentColor = oldContentColor;
 			GUI.enabled = oldEnabled;
 			GUI.matrix = oldMatrix;
+
+			EditorGUIUtility.fieldWidth = oldFieldWidth;
+			EditorGUIUtility.labelWidth = oldLabelWidth;
 		}
 	}
 }

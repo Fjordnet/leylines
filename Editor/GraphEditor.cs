@@ -29,6 +29,13 @@ namespace Exodrifter.NodeGraph
 	[Serializable]
 	public class GraphEditor : EditorWindow
 	{
+		public static GraphEditor Instance { get; private set; }
+
+		public static bool IsOpen
+		{
+			get { return Instance != null; }
+		}
+
 		[SerializeField]
 		private bool graphIDSet = false;
 		[SerializeField]
@@ -157,6 +164,16 @@ namespace Exodrifter.NodeGraph
 		public static Texture2D flatTexture;
 		public static Texture2D boxTexture;
 
+		void Awake()
+		{
+			Instance = this;
+		}
+
+		void OnDestroy()
+		{
+			Instance = null;
+		}
+
 		void OnGUI()
 		{
 			// Make the box texture opaque
@@ -227,21 +244,25 @@ namespace Exodrifter.NodeGraph
 			XGUI.BeginArea(new Rect(0, 0, position.width - 10, TOOLBAR_HEIGHT));
 			XGUI.BeginHorizontal();
 
-			XGUI.ResetToStyle(GUI.skin.button);
-			XGUI.Enabled = Graph != null;
-			if (XGUI.Button("Save", XGUI.Height(15)))
-			{
-				AssetDatabase.SaveAssets();
-			}
-
 			var oldGraph = Graph;
+			XGUI.ResetToStyle(null);
+			XGUI.BeginVertical();
+			XGUI.FlexibleSpace();
 			Graph = XGUI.ObjectField(Graph, false);
 			if (Graph != oldGraph)
 			{
 				CenterView();
 			}
+			XGUI.FlexibleSpace();
+			XGUI.EndVertical();
 
 			XGUI.FlexibleSpace();
+
+			XGUI.ResetToStyle(GUI.skin.button);
+			if (XGUI.Button("Variables"))
+			{
+				VariablesEditor.Launch(this);
+			}
 
 			XGUI.EndHorizontal();
 			XGUI.EndArea();
@@ -495,6 +516,11 @@ namespace Exodrifter.NodeGraph
 			}
 
 			Repaint();
+
+			if (GUI.changed)
+			{
+				EditorUtility.SetDirty(Graph);
+			}
 		}
 
 		private Rect GetGraphRect()

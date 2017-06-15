@@ -323,6 +323,27 @@ namespace Exodrifter.NodeGraph
 		private static bool enabled = true;
 
 		/// <summary>
+		/// The minimum width in pixels reserved for the fields of Editor GUI
+		/// controls.
+		/// </summary>
+		public static float FieldWidth
+		{
+			get { return fieldWidth; }
+			set { fieldWidth = value; }
+		}
+		private static float fieldWidth;
+
+		/// <summary>
+		/// The width in pixels reserved for labels of Editor GUI controls.
+		/// </summary>
+		public static float LabelWidth
+		{
+			get { return labelWidth; }
+			set { labelWidth = value; }
+		}
+		private static float labelWidth;
+
+		/// <summary>
 		/// The GUI transform matrix.
 		/// </summary>
 		public static Matrix4x4 Matrix
@@ -360,6 +381,7 @@ namespace Exodrifter.NodeGraph
 			backgroundColor = Color.white;
 			contentColor = Color.white;
 			matrix = Matrix4x4.identity;
+			fieldWidth = -1;
 		}
 
 		#endregion
@@ -1510,6 +1532,34 @@ namespace Exodrifter.NodeGraph
 		{
 			using (new XGUIStatic())
 				EditorGUILayout.ObjectField(prop, typeof(T), label, options);
+		}
+
+		#endregion
+
+		#region TextField
+
+		public static string TextField(Rect rect, string label, string text)
+		{
+			using (new XGUIStatic())
+				return EditorGUI.TextField(rect, label, text, style);
+		}
+
+		public static string TextField(Rect rect, GUIContent label, string text)
+		{
+			using (new XGUIStatic())
+				return EditorGUI.TextField(rect, label, text, style);
+		}
+
+		public static string TextField(string label, string text, params GUILayoutOption[] options)
+		{
+			using (new XGUIStatic())
+				return EditorGUILayout.TextField(label, text, style, options);
+		}
+
+		public static string TextField(GUIContent label, string text, params GUILayoutOption[] options)
+		{
+			using (new XGUIStatic())
+				return EditorGUILayout.TextField(label, text, style, options);
 		}
 
 		#endregion
