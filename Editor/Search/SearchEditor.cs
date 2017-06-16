@@ -36,6 +36,8 @@ namespace Exodrifter.NodeGraph
 		private bool contextWantsInput;
 		private Type contextWantsType;
 
+		bool searchNodes = true;
+
 		#region Properties
 
 		public bool IsOpen
@@ -121,65 +123,195 @@ namespace Exodrifter.NodeGraph
 			var rect = new Rect();
 			rect.size = size;
 			rect.center = position + new Vector2(0, rect.size.y / 2);
-
 			XGUI.ResetToStyle(GUI.skin.box);
 			XGUI.Normal.background = GraphEditor.boxTexture;
 			XGUI.Box(rect);
 
 			rect.position += Vector2.one * SEARCH_PADDING;
 			rect.size -= Vector2.one * SEARCH_PADDING * 2;
-			GUILayout.BeginArea(rect);
-			GUILayout.BeginVertical();
+			XGUI.ResetToStyle(null);
+			XGUI.BeginArea(rect);
+			XGUI.BeginVertical();
 
-			// Detect key events before the text field
-			var keysUsed = false;
-			switch (Event.current.type)
+			if (XEvent.IsKeyDown(KeyCode.Escape))
 			{
-				case EventType.KeyDown:
-					switch (Event.current.keyCode)
-					{
-						case KeyCode.UpArrow:
-							selected--;
-							Event.current.Use();
-							break;
-
-						case KeyCode.DownArrow:
-							selected++;
-							Event.current.Use();
-							break;
-
-						case KeyCode.Home:
-							selected = 0;
-							Event.current.Use();
-							break;
-
-						case KeyCode.End:
-							selected = int.MaxValue;
-							Event.current.Use();
-							break;
-
-						case KeyCode.PageUp:
-							selected -= 11;
-							Event.current.Use();
-							break;
-
-						case KeyCode.PageDown:
-							selected += 11;
-							Event.current.Use();
-							break;
-					}
-
-					keysUsed = Event.current.type == EventType.Used;
-
-					break;
+				Close();
+				XEvent.Use();
 			}
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Search:", GUILayout.ExpandWidth(false));
-			GUI.SetNextControlName("search_field");
-			var newSearchStr = GUILayout.TextField(searchStr);
-			GUI.FocusControl("search_field");
+			// Search bar
+			XGUI.BeginHorizontal();
+			XGUI.ResetToStyle(GUI.skin.button);
+			var buttonString = searchNodes ? "Nodes" : "Variables";
+			if (XGUI.Button(buttonString, XGUI.Width(70))) {
+				searchNodes = !searchNodes;
+			}
 
+			bool keysUsed = false;
+			var newSearchStr = searchStr;
+			if (searchNodes)
+			{
+				// Detect key events before the text field
+				switch (Event.current.type)
+				{
+					case EventType.KeyDown:
+						switch (Event.current.keyCode)
+						{
+							case KeyCode.UpArrow:
+								selected--;
+								Event.current.Use();
+								break;
+
+							case KeyCode.DownArrow:
+								selected++;
+								Event.current.Use();
+								break;
+
+							case KeyCode.Home:
+								selected = 0;
+								Event.current.Use();
+								break;
+
+							case KeyCode.End:
+								selected = int.MaxValue;
+								Event.current.Use();
+								break;
+
+							case KeyCode.PageUp:
+								selected -= 11;
+								Event.current.Use();
+								break;
+
+							case KeyCode.PageDown:
+								selected += 11;
+								Event.current.Use();
+								break;
+						}
+
+						keysUsed = Event.current.type == EventType.Used;
+						break;
+				}
+
+				XGUI.ResetToStyle(GUI.skin.textField);
+				GUI.SetNextControlName("search_field");
+				newSearchStr = XGUI.TextField(searchStr);
+				GUI.FocusControl("search_field");
+
+				var countStr = "" + resultCount;
+				if (searchJob != null && searchJob.IsRunning)
+				{
+					countStr += "...";
+				}
+				GUILayout.Label(countStr, GUILayout.ExpandWidth(false));
+			}
+			GUILayout.EndHorizontal();
+
+			var hoveringOnResult = false;
+			if (searchNodes)
+			{
+				hoveringOnResult = DrawNodeResults(editor, newSearchStr, keysUsed);
+			}
+			else
+			{
+				DrawVariableResults(editor);
+			}
+
+			GUILayout.EndVertical();
+			GUILayout.EndArea();
+
+			switch(Event.current.type)
+			{
+				case EventType.MouseDown:
+					if (hoveringOnResult)
+					{
+						SelectResult(editor, selected);
+						Close();
+					}
+					else if (rect.Contains(Event.current.mousePosition))
+					{
+						editor.Target = this;
+						Event.current.Use();
+					}
+					break;
+
+				case EventType.MouseUp:
+					if (rect.Contains(Event.current.mousePosition))
+					{
+						editor.Target = this;
+						Event.current.Use();
+					}
+					break;
+			}
+		}
+
+		private Vector2 varScrollPos;
+
+		private void DrawVariableResults(GraphEditor editor)
+		{
+			var variables = editor.Graph.Variables;
+
+			if (variables.AsList().Count == 0)
+			{
+				XGUI.ResetToStyle(GUI.skin.label);
+				XGUI.Alignment = TextAnchor.LowerCenter;
+				XGUI.Enabled = false;
+				XGUI.FontStyle = FontStyle.Italic;
+				XGUI.Label("No variables", XGUI.MaxHeight(30));
+			}
+			else
+			{
+				varScrollPos = GUILayout.BeginScrollView(varScrollPos);
+				foreach (var variable in variables)
+				{
+					XGUI.ResetToStyle(null);
+					XGUI.BeginHorizontal();
+
+					XGUI.ResetToStyle(GUI.skin.button);
+					if (XGUI.Button("Get", XGUI.Width(40)))
+					{
+						var node = ScriptableObject.CreateInstance<DynamicNode>();
+						node.name = "Get";
+
+						node.AddOutputSocket(new DynamicSocket(
+							variable.Value.Type, variable.Name));
+
+						node.AddEvalInvoke(new EvalInvoke(
+							variable.Name, variable.Name, variable.Name, InvokeType.GetVar));
+						editor.AddNode(node, spawnPosition);
+					}
+					if (XGUI.Button("Set", XGUI.Width(40)))
+					{
+						var node = ScriptableObject.CreateInstance<DynamicNode>();
+						node.name = "Set";
+
+						node.AddInputSocket(new DynamicSocket(
+							typeof(ExecType), "execIn"));
+						node.AddInputSocket(new DynamicSocket(
+							variable.Value.Type, "newValue"));
+
+						node.AddOutputSocket(new DynamicSocket(
+							typeof(ExecType), "execOut"));
+						node.AddOutputSocket(new DynamicSocket(
+							variable.Value.Type, variable.Name));
+
+						node.AddExecInvoke(new ExecInvoke(
+							"execIn", "execOut", "newValue", variable.Name, variable.Name, InvokeType.SetVar));
+						editor.AddNode(node, spawnPosition);
+					}
+
+					XGUI.ResetToStyle(GUI.skin.label);
+					XGUI.Label(variable.Name);
+
+					XGUI.EndHorizontal();
+				}
+
+				GUILayout.EndScrollView();
+			}
+		}
+
+		private bool DrawNodeResults
+			(GraphEditor editor, string newSearchStr, bool keysUsed)
+		{
 			if (searchStr != newSearchStr || justOpened)
 			{
 				justOpened = false;
@@ -287,20 +419,9 @@ namespace Exodrifter.NodeGraph
 			}
 			scrollPos = Mathf.Clamp(scrollPos, 0, Mathf.Max(0, resultCount - 12));
 
-			var countStr = "" + resultCount;
-			if (searchJob != null && searchJob.IsRunning)
-			{
-				countStr += "...";
-			}
-			GUILayout.Label(countStr, GUILayout.ExpandWidth(false));
-			GUILayout.EndHorizontal();
-
-			var oldRichText = GUI.skin.label.richText;
-			GUI.skin.label.richText = true;
-
-			GUILayout.BeginHorizontal();
-			var scrollSize = GUI.skin.verticalScrollbar.fixedWidth;
-			GUILayout.BeginVertical();
+			XGUI.ResetToStyle(null);
+			XGUI.BeginHorizontal();
+			XGUI.BeginVertical();
 			// Show results
 			int index = Mathf.Clamp((int)scrollPos, 0, resultCount);
 			bool hoveringOnResult = false;
@@ -308,27 +429,26 @@ namespace Exodrifter.NodeGraph
 			{
 				var result = results[i];
 
-				GUIStyle style = new GUIStyle(GUI.skin.label);
-				var oldAlignment = GUI.skin.label.alignment;
-				var oldColor = GUI.skin.label.normal.textColor;
-				GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+				XGUI.ResetToStyle(GUI.skin.label);
 				if (i == selected)
 				{
-					style.normal.background = GetHighlightTex();
-
-					GUILayout.BeginHorizontal(style);
-					GUI.skin.label.normal.textColor = Color.white;
+					XGUI.Normal.background = GetHighlightTex();
 				}
-				else
+				XGUI.BeginHorizontal();
+
+				XGUI.ResetToStyle(GUI.skin.label);
+				if (i == selected)
 				{
-					GUILayout.BeginHorizontal(style);
+					XGUI.Normal.textColor = Color.white;
 				}
+				XGUI.RichText = true;
+				XGUI.Alignment = TextAnchor.MiddleLeft;
+				var score = "" + FuzzySearch(searchStr, result.Label);
+				var highlight = FuzzyHighlight(searchStr, result.Label);
+				XGUI.Label(score, XGUI.Width(30));
+				XGUI.Label(highlight, XGUI.ExpandWidth(true));
 
-				var label = FuzzySearch(searchStr, result.Label) + " "
-					+ FuzzyHighlight(searchStr, result.Label);
-				GUILayout.Label(label, GUILayout.Width(rect.width - scrollSize
-					- style.padding.left * 3 - style.padding.right * 3));
-				GUILayout.EndHorizontal();
+				XGUI.EndHorizontal();
 
 				var lastRect = GUILayoutUtility.GetLastRect();
 				if (lastRect.Contains(Event.current.mousePosition))
@@ -340,54 +460,24 @@ namespace Exodrifter.NodeGraph
 					}
 					hoveringOnResult = selected == i;
 				}
-
-				GUI.skin.label.normal.textColor = oldColor;
-				GUI.skin.label.alignment = oldAlignment;
 			}
 			// No results
 			if (resultCount == 0)
 			{
-				var oldAlignment = GUI.skin.label.alignment;
-				GUI.skin.label.alignment = TextAnchor.LowerCenter;
-				GUI.enabled = false;
-				GUILayout.Label("<i>No results</i>", GUILayout.MaxHeight(30));
-				GUI.enabled = true;
-				GUI.skin.label.alignment = oldAlignment;
+				XGUI.ResetToStyle(GUI.skin.label);
+				XGUI.Alignment = TextAnchor.LowerCenter;
+				XGUI.Enabled = false;
+				XGUI.FontStyle = FontStyle.Italic;
+				XGUI.Label("No results", XGUI.MaxHeight(30));
 			}
-			GUILayout.EndVertical();
+			XGUI.EndVertical();
 			scrollPos = GUILayout.VerticalScrollbar
 				(scrollPos, Mathf.Min(resultCount, 12),
 				0, Mathf.Max(resultCount, 12), GUILayout.ExpandHeight(true));
-			GUILayout.EndHorizontal();
-
-			GUI.skin.label.richText = oldRichText;
-
-			GUILayout.EndVertical();
-			GUILayout.EndArea();
+			XGUI.EndHorizontal();
 
 			switch (Event.current.type)
 			{
-				case EventType.MouseDown:
-					if (hoveringOnResult)
-					{
-						SelectResult(editor, selected);
-						Close();
-					}
-					else if (rect.Contains(Event.current.mousePosition))
-					{
-						editor.Target = this;
-						Event.current.Use();
-					}
-					break;
-
-				case EventType.MouseUp:
-					if (rect.Contains(Event.current.mousePosition))
-					{
-						editor.Target = this;
-						Event.current.Use();
-					}
-					break;
-
 				case EventType.ScrollWheel:
 					scrollPos += Event.current.delta.y;
 					Event.current.Use();
@@ -402,13 +492,11 @@ namespace Exodrifter.NodeGraph
 							SelectResult(editor, selected);
 							Close();
 							break;
-
-						case KeyCode.Escape:
-							Close();
-							break;
 					}
 					break;
 			}
+
+			return hoveringOnResult;
 		}
 
 		private void SelectResult(GraphEditor editor, int index)

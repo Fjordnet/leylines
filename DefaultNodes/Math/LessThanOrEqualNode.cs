@@ -2,7 +2,7 @@
 
 namespace Exodrifter.NodeGraph.DefaultNodes
 {
-	[Node(Name = "<=", Path = "Math/Less Than  Or Equal (<=)")]
+	[Node(Name = "<=", Path = "Math/Less Than Or Equal (<=)")]
 	public class LessThanOrEqualNode : BakedNode
 	{
 		[Description("The left-hand value.")]

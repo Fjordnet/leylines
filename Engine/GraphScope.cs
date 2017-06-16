@@ -26,13 +26,20 @@ namespace Exodrifter.NodeGraph
 	public class GraphScope
 	{
 		public Dictionary<Socket, object> Values { get; set; }
+		public Dictionary<string, DynamicValue> Vars { get; set; }
 
 		private HashSet<int> evaluatedIDs;
 
-		public GraphScope()
+		public GraphScope(Graph graph)
 		{
 			Values = new Dictionary<Socket, object>();
+			Vars = new Dictionary<string, DynamicValue>();
 			evaluatedIDs = new HashSet<int>();
+
+			foreach (var v in graph.Variables)
+			{
+				Vars.Add(v.Name, v.Value);
+			}
 		}
 
 		/// <summary>
@@ -42,6 +49,11 @@ namespace Exodrifter.NodeGraph
 		{
 			Values = new Dictionary<Socket, object>(other.Values);
 			evaluatedIDs = new HashSet<int>(other.evaluatedIDs);
+
+			foreach (var v in other.Vars)
+			{
+				Vars.Add(v.Key, v.Value);
+			}
 		}
 
 		public bool ShouldEvaluate(int nodeID)

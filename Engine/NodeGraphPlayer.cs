@@ -84,7 +84,7 @@ namespace Exodrifter.NodeGraph
 			foreach (var from in entryPoints[type])
 			{
 				// Initialize the scope
-				var scope = new GraphScope();
+				var scope = new GraphScope(Graph);
 				Eval(from.GetNode(Graph), scope);
 
 				// Start Execution
