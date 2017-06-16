@@ -16,7 +16,7 @@ namespace Exodrifter.NodeGraph
 		{
 			if (instance == null)
 			{
-				instance = ScriptableObject.CreateInstance<AddVariableWindow>();
+				instance = CreateInstance<AddVariableWindow>();
 			}
 			instance.titleContent = new GUIContent("Add Variable");
 			instance.list = list;

@@ -23,8 +23,9 @@ namespace Exodrifter.NodeGraph
 {
 	public enum InvokeType
 	{
+		CallMethod,
 		GetField, SetField,
 		GetProperty, SetProperty,
-		CallMethod
+		GetVar, SetVar,
 	}
 }

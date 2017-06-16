@@ -67,7 +67,7 @@ namespace Exodrifter.NodeGraph
 					continue;
 				}
 
-				Invoke(invoke);
+				Invoke(scope, invoke);
 
 				var next = GetSocket(invoke.Next);
 				if (!Util.IsNull(next))
@@ -83,11 +83,11 @@ namespace Exodrifter.NodeGraph
 		{
 			foreach (var invoke in evalInvokes)
 			{
-				Invoke(invoke);
+				Invoke(scope, invoke);
 			}
 		}
 
-		private void Invoke(IInvoke invoke)
+		private void Invoke(GraphScope scope, IInvoke invoke)
 		{
 			var targetSocket = GetSocket(invoke.Target);
 			if (Util.IsNull(targetSocket))
@@ -138,6 +138,18 @@ namespace Exodrifter.NodeGraph
 					if (method.ReturnType != typeof(void)) {
 						SetSocketValue(invoke.Result, value);
 					}
+					break;
+
+				case InvokeType.SetVar:
+					value = GetSocketValue(invoke.Target);
+					scope.Vars[invoke.MemberName].Value = value;
+					SetSocketValue(invoke.Result, value);
+					break;
+
+				case InvokeType.GetVar:
+					Debug.Log("Getting " + invoke.Target);
+					value = scope.Vars[invoke.Target].Value;
+					SetSocketValue(invoke.Result, value);
 					break;
 
 				default:
