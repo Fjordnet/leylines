@@ -26,7 +26,7 @@ using UnityEngine;
 namespace Exodrifter.NodeGraph
 {
 	/// <summary>
-	/// A helper for the graph player that runs coroutines on the player's
+	/// A helper for the node graph that runs coroutines on the graph's
 	/// behalf.
 	/// </summary>
 	[AddComponentMenu("")]
@@ -64,7 +64,7 @@ namespace Exodrifter.NodeGraph
 
 		#region Logic
 
-		public void Exec(ExecType type)
+		public void Exec(GameObject self, ExecType type)
 		{
 			if (type == ExecType.OnDestroy)
 			{
@@ -84,7 +84,7 @@ namespace Exodrifter.NodeGraph
 			foreach (var from in entryPoints[type])
 			{
 				// Initialize the scope
-				var scope = new GraphScope(Graph);
+				var scope = new GraphScope(self, Graph);
 				Eval(from.GetNode(Graph), scope);
 
 				// Start Execution

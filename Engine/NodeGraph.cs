@@ -59,57 +59,57 @@ namespace Exodrifter.NodeGraph
 
 		void Awake()
 		{
-			Player.Exec(ExecType.OnAwake);
+			Player.Exec(gameObject, ExecType.OnAwake);
 		}
 
 		void Start()
 		{
-			Player.Exec(ExecType.OnStart);
+			Player.Exec(gameObject, ExecType.OnStart);
 		}
 
 		void OnDestroy()
 		{
-			Player.Exec(ExecType.OnDestroy);
+			Player.Exec(gameObject, ExecType.OnDestroy);
 		}
 
 		void OnEnable()
 		{
-			Player.Exec(ExecType.OnEnable);
+			Player.Exec(gameObject, ExecType.OnEnable);
 		}
 
 		void OnDisable()
 		{
-			Player.Exec(ExecType.OnDisable);
+			Player.Exec(gameObject, ExecType.OnDisable);
 		}
 
 		void Update()
 		{
-			Player.Exec(ExecType.OnUpdate);
+			Player.Exec(gameObject, ExecType.OnUpdate);
 		}
 
 		void FixedUpdate()
 		{
-			Player.Exec(ExecType.OnFixedUpdate);
+			Player.Exec(gameObject, ExecType.OnFixedUpdate);
 		}
 
 		void LateUpdate()
 		{
-			Player.Exec(ExecType.OnLateUpdate);
+			Player.Exec(gameObject, ExecType.OnLateUpdate);
 		}
 
 		void OnApplicationFocus()
 		{
-			Player.Exec(ExecType.OnApplicationFocus);
+			Player.Exec(gameObject, ExecType.OnApplicationFocus);
 		}
 
 		void OnApplicationPause()
 		{
-			Player.Exec(ExecType.OnApplicationPause);
+			Player.Exec(gameObject, ExecType.OnApplicationPause);
 		}
 
 		void OnApplicationQuit()
 		{
-			Player.Exec(ExecType.OnApplicationQuit);
+			Player.Exec(gameObject, ExecType.OnApplicationQuit);
 		}
 
 		#endregion

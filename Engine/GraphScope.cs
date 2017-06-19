@@ -20,18 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Exodrifter.NodeGraph
 {
 	public class GraphScope
 	{
+		public GameObject GameObject { get; set; }
 		public Dictionary<Socket, object> Values { get; set; }
 		public Dictionary<string, DynamicValue> Vars { get; set; }
 
 		private HashSet<int> evaluatedIDs;
 
-		public GraphScope(Graph graph)
+		public GraphScope(GameObject self, Graph graph)
 		{
+			GameObject = self;
 			Values = new Dictionary<Socket, object>();
 			Vars = new Dictionary<string, DynamicValue>();
 			evaluatedIDs = new HashSet<int>();
