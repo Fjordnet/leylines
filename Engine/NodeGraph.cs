@@ -97,14 +97,16 @@ namespace Exodrifter.NodeGraph
 			Player.Exec(gameObject, ExecType.OnLateUpdate);
 		}
 
-		void OnApplicationFocus()
+		void OnApplicationFocus(bool focus)
 		{
-			Player.Exec(gameObject, ExecType.OnApplicationFocus);
-		}
-
-		void OnApplicationPause()
-		{
-			Player.Exec(gameObject, ExecType.OnApplicationPause);
+			if (focus)
+			{
+				Player.Exec(gameObject, ExecType.OnApplicationFocus);
+			}
+			else
+			{
+				Player.Exec(gameObject, ExecType.OnApplicationPause);
+			}
 		}
 
 		void OnApplicationQuit()
