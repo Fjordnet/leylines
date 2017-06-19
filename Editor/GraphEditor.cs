@@ -522,7 +522,7 @@ namespace Exodrifter.NodeGraph
 
 			Repaint();
 
-			if (GUI.changed)
+			if (GUI.changed && Graph != null && !Graph.Equals(null))
 			{
 				EditorUtility.SetDirty(Graph);
 			}
