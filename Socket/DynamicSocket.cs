@@ -33,6 +33,8 @@ namespace Exodrifter.NodeGraph
 		[SerializeField]
 		private string socketName;
 		[SerializeField]
+		private string displayName;
+		[SerializeField]
 		private string description;
 		[SerializeField]
 		private SocketFlags flags;
@@ -48,6 +50,15 @@ namespace Exodrifter.NodeGraph
 		{
 			get { return socketName; }
 			set { socketName = value; }
+		}
+
+		/// <summary>
+		/// The display name of the socket.
+		/// </summary>
+		public string DisplayName
+		{
+			get { return displayName; }
+			set { displayName = value; }
 		}
 
 		/// <summary>
@@ -92,13 +103,16 @@ namespace Exodrifter.NodeGraph
 		/// Creates a new SocketDefinition.
 		/// </summary>
 		/// <param name="type">The type of the socket.</param>
-		/// <param name="name">The name of the socket.</param>
+		/// <param name="displayName">The display name of the socket.</param>
+		/// <param name="socketName">The name of the socket.</param>
 		/// <param name="flags">The socket flags.</param>
-		public DynamicSocket(Type type, string name, SocketFlags flags = 0)
+		public DynamicSocket(string displayName,
+			Type type, string socketName, SocketFlags flags = 0)
 		{
 			value = new DynamicValue();
 			SocketType = type;
-			SocketName = name;
+			DisplayName = displayName;
+			SocketName = socketName;
 			Flags = flags;
 		}
 	}

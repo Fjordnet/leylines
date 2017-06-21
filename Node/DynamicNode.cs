@@ -179,6 +179,16 @@ namespace Exodrifter.NodeGraph
 			evalInvokes.Add(invoke);
 		}
 
+		public void SetInputWidth(float width)
+		{
+			inputWidth = width;
+		}
+
+		public void SetOutputWidth(float width)
+		{
+			outputWidth = width;
+		}
+
 		#endregion
 
 		#region Socket Getters and Setters
@@ -260,7 +270,7 @@ namespace Exodrifter.NodeGraph
 		public override string GetSocketDisplayName(string name)
 		{
 			var socket = GetDynamicSocket(name);
-			return socket.SocketName;
+			return socket.DisplayName;
 		}
 
 		public override SocketFlags GetSocketFlags(string name)

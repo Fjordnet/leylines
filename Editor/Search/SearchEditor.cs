@@ -273,7 +273,7 @@ namespace Exodrifter.NodeGraph
 						node.name = "Get";
 
 						node.AddOutputSocket(new DynamicSocket(
-							variable.Value.Type, variable.Name));
+							variable.Name, variable.Value.Type, variable.Name));
 
 						node.AddEvalInvoke(new EvalInvoke(
 							variable.Name, variable.Name, variable.Name, InvokeType.GetVar));
@@ -283,16 +283,17 @@ namespace Exodrifter.NodeGraph
 					{
 						var node = ScriptableObject.CreateInstance<DynamicNode>();
 						node.name = "Set";
+						node.SetInputWidth(60);
 
 						node.AddInputSocket(new DynamicSocket(
-							typeof(ExecType), "execIn"));
+							"Exec", typeof(ExecType), "execIn"));
 						node.AddInputSocket(new DynamicSocket(
-							variable.Value.Type, "newValue"));
+							"Value", variable.Value.Type, "value", SocketFlags.Editable));
 
 						node.AddOutputSocket(new DynamicSocket(
-							typeof(ExecType), "execOut"));
+							"Exec", typeof(ExecType), "execOut"));
 						node.AddOutputSocket(new DynamicSocket(
-							variable.Value.Type, variable.Name));
+							variable.Name, variable.Value.Type, variable.Name));
 
 						node.AddExecInvoke(new ExecInvoke(
 							"execIn", "execOut", "newValue", variable.Name, variable.Name, InvokeType.SetVar));
