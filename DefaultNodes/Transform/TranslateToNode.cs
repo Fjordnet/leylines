@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Exodrifter.NodeGraph.DefaultNodes
 {
-	[Node(Name = "Move To", Path = "Transform/Move To")]
-	public class MoveToNode : BakedNode
+	[Node(Name = "Translate To", Path = "Transform/Translate To")]
+	public class TranslateToNode : BakedNode
 	{
 		[Description("The input signal.")]
 		[SerializeField, Input("Exec", 0)]
