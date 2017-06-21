@@ -3,21 +3,21 @@ using UnityEngine;
 
 namespace Exodrifter.NodeGraph.DefaultNodes
 {
-	[Node(Name = "Translate To", Path = "Transform/Translate To")]
-	public class TranslateToNode : BakedNode
+	[Node(Name = "Set Rotation", Path = "Transform/Set Rotation")]
+	public class SetRotationNode : BakedNode
 	{
 		[Description("The input signal.")]
 		[SerializeField, Input("Exec", 0)]
 		internal ExecType execIn = ExecType.None;
-		[Description("The transform to translate.")]
+		[Description("The transform to set the rotation of.")]
 		[SerializeField, Input("Transform")]
 		internal Transform transform = null;
-		[Description("Defines the position in local or world space.")]
+		[Description("Defines the rotation in local or world space.")]
 		[SerializeField, Input("Relative To")]
 		internal Space relativeTo = Space.Self;
-		[Description("The position to go to.")]
-		[SerializeField, Input("Destination")]
-		internal Vector3 destination = Vector3.zero;
+		[Description("The rotation to use, in degrees.")]
+		[SerializeField, Input("Rotation")]
+		internal Vector3 rotation = Vector3.zero;
 
 		[Description("The output signal.")]
 		[SerializeField, Output("Exec")]
@@ -33,11 +33,11 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		{
 			if (relativeTo == Space.Self)
 			{
-				transform.localPosition = destination;
+				transform.localRotation = Quaternion.Euler(rotation);
 			}
 			else
 			{
-				transform.position = destination;
+				transform.rotation = Quaternion.Euler(rotation);
 			}
 
 			transformOut = transform;
