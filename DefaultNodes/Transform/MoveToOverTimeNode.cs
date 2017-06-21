@@ -19,7 +19,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("The position to go to.")]
 		[SerializeField, Input("Destination")]
 		internal Vector3 destination = Vector3.zero;
-		[Description("The amount of time in seconds to move.")]
+		[Description("The amount of time in seconds to take.")]
 		[SerializeField, Input("Seconds")]
 		internal float seconds = 1;
 		[Description("The easing to use.")]

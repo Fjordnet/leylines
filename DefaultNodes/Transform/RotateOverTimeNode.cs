@@ -22,7 +22,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("The number of degrees to rotate by.")]
 		[SerializeField, Input("Degrees")]
 		internal float degrees = 0;
-		[Description("The amount of time in seconds to rotate.")]
+		[Description("The amount of time in seconds to take.")]
 		[SerializeField, Input("Seconds")]
 		internal float seconds = 1;
 		[Description("The easing to use.")]
