@@ -336,7 +336,7 @@ namespace Exodrifter
 			}
 
 			// Prepare a tooltip
-			if (hovering && editor.Target == null)
+			if (hovering && editor.Tooltip == null)
 			{
 				var text = string.Format(
 					"<color=#4aa><i>{0}</i></color> <b>{1}</b>\n{2}{3}{4}",
@@ -348,7 +348,7 @@ namespace Exodrifter
 					(editable && !linked ? "\n<color=#777><i>Shift + Right click to copy</i></color>" : ""),
 					(clipboardHasValue ? "\n<color=#777><i>Shift + Left click to paste</i></color>" : "")
 				);
-				editor.Target = new Tooltip(text);
+				editor.Tooltip = new Tooltip(text);
 			}
 		}
 

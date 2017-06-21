@@ -105,14 +105,9 @@ namespace Exodrifter.NodeGraph
 			}
 		}
 
-		private object target;
-		public object Target
-		{
-			get { return target; }
-			set { PreviousTarget = target; target = value; }
-		}
+		public object Target { get; set; }
+		public Tooltip Tooltip { get; set; }
 
-		public object PreviousTarget { get; set; }
 		public Vector2 Offset { get; set; }
 		public int Snap { get { return snap ? GRID_CELL_SIZE : 0; } }
 		public Vector2 GraphPosition { get; private set; }
@@ -176,6 +171,8 @@ namespace Exodrifter.NodeGraph
 
 		void OnGUI()
 		{
+			Tooltip = null;
+
 			// Make the box texture opaque
 			if (EditorGUIUtility.isProSkin && boxTexture == null)
 			{
@@ -368,10 +365,9 @@ namespace Exodrifter.NodeGraph
 				}
 
 				// Draw Tooltip
-				if (Target is Tooltip)
+				if (Tooltip != null)
 				{
-					(Target as Tooltip).OnGUI();
-					Target = null;
+					Tooltip.OnGUI();
 				}
 
 				// Search box
