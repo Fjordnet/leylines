@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Exodrifter.NodeGraph.DefaultNodes
 {
-	[Node(Name = "Move To", Path = "Transform/Move To")]
-	public class MoveToNode : BakedNode
+	[Node(Name = "Move To Over Time", Path = "Transform/Move To Over Time")]
+	public class MoveToOverTimeNode : BakedNode
 	{
 		[Description("The input signal.")]
 		[SerializeField, Input("Exec", 0)]
@@ -44,7 +44,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		public override IEnumerator<Yield> Exec
 			(Socket from, Socket to, GraphScope scope)
 		{
-			var agent = new GameObject().AddComponent<MoveToNodeAgent>();
+			var agent = new GameObject().AddComponent<MoveToAgent>();
 			agent.target = transform;
 			agent.relativeTo = relativeTo;
 			agent.destination = destination;
@@ -67,7 +67,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 
 		#endregion
 
-		private class MoveToNodeAgent : MonoBehaviour
+		private class MoveToAgent : MonoBehaviour
 		{
 			public Transform target = null;
 			public Space relativeTo = Space.Self;
