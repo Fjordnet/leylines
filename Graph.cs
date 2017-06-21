@@ -110,19 +110,26 @@ namespace Exodrifter.NodeGraph
 				return new Vector2(0, 0);
 			}
 
-			var count = 1;
-			var center = nodes[0].Pos;
-			for (int i = 1; i < nodes.Count; ++i)
+			var count = 0;
+			Vector2? center = null;
+			for (int i = 0; i < nodes.Count; ++i)
 			{
 				if (!Util.IsNull(nodes[i]))
 				{
 					count++;
-					center += nodes[i].Pos;
+					if (center == null)
+					{
+						center = nodes[i].Pos;
+					}
+					else
+					{
+						center += nodes[i].Pos;
+					}
 				}
 			}
 			center /= count;
 
-			return center;
+			return center ?? Vector2.zero;
 		}
 
 		public override string ToString()
