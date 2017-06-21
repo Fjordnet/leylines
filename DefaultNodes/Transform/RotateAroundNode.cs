@@ -12,7 +12,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 		[Description("The transform to rotate.")]
 		[SerializeField, Input("Transform")]
 		internal Transform transform = null;
-		[Description("The point to rotate around.")]
+		[Description("The point in world space to rotate around.")]
 		[SerializeField, Input("Point")]
 		internal Vector3 point = Vector3.zero;
 		[Description("The axis through the point to rotate around.")]
