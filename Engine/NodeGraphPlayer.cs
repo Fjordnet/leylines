@@ -106,8 +106,16 @@ namespace Exodrifter.NodeGraph
 
 		private IEnumerator<Yield> Exec(Socket from, Socket to, GraphScope scope)
 		{
-			var source = to.GetNode(Graph);
-			var destination = to.GetNode(Graph);
+			Node source, destination;
+			try
+			{
+				source = to.GetNode(Graph);
+				destination = to.GetNode(Graph);
+			}
+			catch (InvalidOperationException)
+			{
+				yield break;
+			}
 
 			// Store from socket outputs in the scope
 			foreach (var output in source.GetOutputSockets())
