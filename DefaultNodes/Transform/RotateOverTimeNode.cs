@@ -99,8 +99,9 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 				switch (relativeTo)
 				{
 					case Space.Self:
-						a = transform.localRotation;
-						b = a * Quaternion.AngleAxis(degrees, axis);
+						a = target.localRotation;
+						b = a * Quaternion.AngleAxis(degrees,
+							target.TransformDirection(axis));
 
 						while (elapsed < seconds)
 						{
@@ -108,7 +109,8 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 							t = easing.Interpolate(t);
 
 							target.localRotation =
-								a * Quaternion.AngleAxis(degrees * t, axis);
+								a * Quaternion.AngleAxis(degrees * t,
+								transform.TransformDirection(axis));
 
 							yield return new WaitForEndOfFrame();
 
@@ -121,8 +123,8 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 						break;
 
 					case Space.World:
-						a = transform.rotation;
-						b = a * Quaternion.AngleAxis(degrees, axis);
+						a = target.rotation;
+						b = Quaternion.AngleAxis(degrees, axis) * a;
 
 						while (elapsed < seconds)
 						{
@@ -130,7 +132,7 @@ namespace Exodrifter.NodeGraph.DefaultNodes
 							t = easing.Interpolate(t);
 
 							target.rotation =
-								a * Quaternion.AngleAxis(degrees * t, axis);
+								Quaternion.AngleAxis(degrees * t, axis) * a;
 
 							yield return new WaitForEndOfFrame();
 
