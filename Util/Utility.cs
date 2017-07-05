@@ -19,8 +19,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using UnityEditor;
-
 namespace Exodrifter.NodeGraph
 {
 	/// <summary>
@@ -36,14 +34,18 @@ namespace Exodrifter.NodeGraph
 		/// <param name="label">The name to use for this undo group.</param>
 		public UndoStack(string label)
 		{
-			Undo.SetCurrentGroupName(label);
-			group = Undo.GetCurrentGroup();
-			Undo.IncrementCurrentGroup();
+#if UNITY_EDITOR
+			UnityEditor.Undo.SetCurrentGroupName(label);
+			group = UnityEditor.Undo.GetCurrentGroup();
+			UnityEditor.Undo.IncrementCurrentGroup();
+#endif
 		}
 
 		public void Dispose()
 		{
-			Undo.CollapseUndoOperations(group);
+#if UNITY_EDITOR
+			UnityEditor.Undo.CollapseUndoOperations(group);
+#endif
 		}
 	}
 
