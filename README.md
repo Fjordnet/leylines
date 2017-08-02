@@ -1,6 +1,3 @@
-THIS REPOSITORY HAS BEEN MOVED! The bitbucket repo will no longer be updated.
-The new remote URL is: https://github.com/Fjordnet/leylines.git
-
 # Ley Lines
 Ley Lines is a node graph editor framework for Unity that allows for a variety
 of uses.
